@@ -59,7 +59,7 @@ public final class Board {
         ImmutableTable.Builder<Integer, Integer, TokenPlacement> tableBuilder = ImmutableTable.builder();
 
         for (TokenPlacement placement : tokenPlacements) {
-            tableBuilder.put(placement.getPosition().getRow(), placement.getPosition().getColumn(), placement);
+            tableBuilder.put(placement.getDestination().getRow(), placement.getDestination().getColumn(), placement);
         }
 
         this.board = tableBuilder.build();

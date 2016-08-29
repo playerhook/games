@@ -112,11 +112,11 @@ public class TicTacToeSession implements LocalSession {
         if (!getDeck(placement.getPlayer()).getPlayableTokens().contains(placement.getToken())) {
             move(Move.of(placement, RuleViolation.Default.ILLEGAL_TOKEN));
         }
-        if (getBoard().getTokenPlacement(placement.getPosition()).isPresent()) {
+        if (getBoard().getTokenPlacement(placement.getDestination()).isPresent()) {
             move(Move.of(placement, RuleViolation.Default.POSITION_ALREADY_TAKEN));
             return;
         }
-        if (!getBoard().contains(placement.getPosition())) {
+        if (!getBoard().contains(placement.getDestination())) {
             move(Move.of(placement, RuleViolation.Default.TOKEN_NOT_ALLOWED_ON_GIVEN_POSITION));
             return;
         }
@@ -155,7 +155,7 @@ public class TicTacToeSession implements LocalSession {
         int count = 1;
 
         for  (Direction direction : directions) {
-            Position position = placement.getPosition().at(direction);
+            Position position = placement.getDestination().at(direction);
 
             while (board.getTokenPlacement(position).map(other -> expected.equals(other.getToken())).orElse(false)) {
                 count++;

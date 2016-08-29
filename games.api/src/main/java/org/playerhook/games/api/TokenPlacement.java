@@ -1,19 +1,23 @@
 package org.playerhook.games.api;
 
+import java.util.Optional;
+
 public final class TokenPlacement {
 
     private final Token token;
     private final Player player;
-    private final Position position;
+    private final Position source;
+    private final Position destination;
 
-    public static TokenPlacement of(Token token, Player player, Position position) {
-        return new TokenPlacement(token, player, position);
+    public static TokenPlacement of(Token token, Player player, Position destination) {
+        return new TokenPlacement(token, player, null, destination);
     }
 
-    private TokenPlacement(Token token, Player player, Position position) {
+    private TokenPlacement(Token token, Player player, Position source, Position destination) {
         this.token = token;
         this.player = player;
-        this.position = position;
+        this.destination = destination;
+        this.source = source;
     }
 
     public Token getToken() {
@@ -24,11 +28,18 @@ public final class TokenPlacement {
         return player;
     }
 
-    public Position getPosition() {
-        return position;
+    public Position getDestination() {
+        return destination;
+    }
+
+    public Optional<Position> getSource() {
+        return Optional.ofNullable(source);
     }
 
     public String toString() {
-        return getPlayer().toString() + " placed " + getToken() + " on " + getPosition();
+        if (source == null) {
+            return getPlayer().toString() + " placed " + getToken() + " on " + getDestination();
+        }
+        return getPlayer().toString() + " moved " + getToken() + " from " + source + " to " + getDestination();
     }
 }
