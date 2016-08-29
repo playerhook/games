@@ -11,22 +11,45 @@ public final class Game {
     private final String description;
     private final URL url;
 
-    public static Game of(String title) {
-        return new Game(title, null, null);
+    private final int maxPlayers;
+    private final int minPlayers;
+
+    public static Game of(String title, int numberOfPlayers) {
+        return new Game(title, numberOfPlayers, numberOfPlayers, null, null);
     }
 
-    public static Game of(String title, String description) {
-        return new Game(title, description, null);
+    public static Game of(String title, int numberOfPlayers, String description) {
+        return new Game(title, numberOfPlayers, numberOfPlayers, description, null);
     }
 
-    public static Game of(String title, String description, URL url) {
-        return new Game(title, description, url);
+    public static Game of(String title, int numberOfPlayers, String description, URL url) {
+        return new Game(title, numberOfPlayers, numberOfPlayers, description, url);
     }
 
-    private Game(String title, String description, URL url) {
+    public static Game of(String title, int minPlayers, int maxPlayers) {
+        return new Game(title, minPlayers, maxPlayers, null, null);
+    }
+
+    public static Game of(String title, int minPlayers, int maxPlayers, String description) {
+        return new Game(title, minPlayers, maxPlayers, description, null);
+    }
+
+    public static Game of(String title, int minPlayers, int maxPlayers, String description, URL url) {
+        return new Game(title, minPlayers, maxPlayers, description, url);
+    }
+
+    private Game(String title, int minPlayers, int maxPlayers, String description, URL url) {
+        if (minPlayers < 1) {
+            throw new IllegalArgumentException("There must be at least one player in each game!");
+        }
+        if (minPlayers > maxPlayers) {
+            throw new IllegalArgumentException("Minimum number of players must be greater or equal to maximum number of players!");
+        }
         this.title = title;
         this.description = description;
         this.url = url;
+        this.minPlayers = minPlayers;
+        this.maxPlayers = maxPlayers;
     }
 
     public String getTitle() {
@@ -39,6 +62,15 @@ public final class Game {
 
     public Optional<URL> getURL() {
         return Optional.ofNullable(url);
+    }
+
+
+    public int getMaxPlayers() {
+        return maxPlayers;
+    }
+
+    public int getMinPlayers() {
+        return minPlayers;
     }
 
     @Override

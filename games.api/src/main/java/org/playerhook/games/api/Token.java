@@ -5,4 +5,8 @@ package org.playerhook.games.api;
  *
  * The specific implementation should be an enum.
  */
-public interface Token {}
+public interface Token {
+
+    String getSymbol();
+
+}

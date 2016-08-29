@@ -1,0 +1,97 @@
+package org.playerhook.games.tictactoe
+
+import org.playerhook.games.api.LocalSession
+import org.playerhook.games.api.Player
+import org.playerhook.games.api.Position
+import org.playerhook.games.api.Session
+import org.playerhook.games.api.SessionUpdate
+import org.playerhook.games.api.Token
+import org.playerhook.games.api.TokenPlacement
+import spock.lang.Specification
+
+import java.security.SecureRandom
+
+/**
+ * Tic Tac Toe game specification.
+ */
+class TicTacToeSessionSpec extends Specification {
+
+    void "sanity check"() {
+        when:
+            SecureRandom random = new SecureRandom()
+            LocalSession session = new TicTacToeSession(3, 3)
+
+            session.asObservable().subscribe {
+                printSession(it)
+            }
+
+            Player dartagnan = Player.create('dartagnan')
+            Player athos = Player.create('athos')
+
+            session.join(dartagnan)
+            session.join(athos)
+
+            session.start()
+
+            while (!session.finished) {
+                Player onTurn = session.playerOnTurn.get()
+                int nextRow = session.board.firstRow + random.nextInt(session.board.height)
+                int nextCol = session.board.firstColumn + random.nextInt(session.board.width)
+                Token token = session.getDeck(onTurn).playableTokens.first()
+                session.play(TokenPlacement.of(token, onTurn, Position.of(nextRow, nextCol)))
+            }
+
+        then:
+            noExceptionThrown()
+    }
+
+    @SuppressWarnings(['Println', 'AbcMetric', 'NestedForLoop'])
+    private static void printSession(SessionUpdate sessionUpdate) {
+        Session session = sessionUpdate.session
+
+        println '=' * 60
+        println session.game.title.center(60)
+
+        if (session.playedMoves && session.playedMoves.last().ruleViolation.isPresent()) {
+            println '-' * 60
+            println session.playedMoves.last().ruleViolation.get().message.center(60, '!')
+        }
+
+        println '=' * 60
+        session.players.each {
+            if (it == session.playerOnTurn.orElse(null)) {
+                print '* '
+            } else {
+                print '  '
+            }
+            print it.username.padRight(40)
+            print ': '
+            print String.valueOf(session.getScore(it)).padLeft(5, '0')
+            println()
+        }
+        println '=' * 60
+        println '-' * (session.board.width * 2 + 1)
+        for (int row = session.board.firstRow; row <= session.board.lastRow; row++) {
+            print '|'
+            for (int col = session.board.firstColumn; col <= session.board.lastColumn; col++) {
+                Optional<TokenPlacement> optional = session.board.getTokenPlacement(Position.of(row, col))
+                if (optional.isPresent()) {
+                    TokenPlacement tokenPlacement = optional.get()
+                    String symbol = tokenPlacement.token.symbol
+                    if (session.playedMoves && session.playedMoves.last().tokenPlacement == tokenPlacement) {
+                        symbol = symbol.toUpperCase()
+                    }
+                    print symbol
+                } else {
+                    print ' '
+                }
+                print '|'
+            }
+            println()
+            println '-' * (session.board.width * 2 + 1)
+        }
+        println '-' * 60
+        println "Updated: ${sessionUpdate.type}"
+    }
+
+}

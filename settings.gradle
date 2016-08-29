@@ -1,1 +1,1 @@
-include 'standard.libraries', 'games.api'
+include 'games.api', 'games.tictactoe'

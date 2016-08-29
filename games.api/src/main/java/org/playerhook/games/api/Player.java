@@ -12,20 +12,20 @@ public final class Player {
     private final String displayName;
     private final String displayColor;
 
-    public static Player of(String username, URL avatar, String displayName, String displayColor) {
+    public static Player create(String username, URL avatar, String displayName, String displayColor) {
         return new Player(username, avatar, displayName, displayColor);
     }
 
-    public static Player of(String username, URL avatar, String displayName) {
-        return of(username, avatar, displayName, null);
+    public static Player create(String username, URL avatar, String displayName) {
+        return create(username, avatar, displayName, null);
     }
 
-    public static Player of(String username, URL avatar) {
-        return of(username, avatar, null);
+    public static Player create(String username, URL avatar) {
+        return create(username, avatar, null);
     }
 
-    public static Player of(String username) {
-        return of(username, null);
+    public static Player create(String username) {
+        return create(username, null);
     }
 
     private Player(String username, URL avatar, String displayName, String displayColor) {

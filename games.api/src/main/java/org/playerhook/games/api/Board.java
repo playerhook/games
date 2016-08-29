@@ -3,6 +3,7 @@ package org.playerhook.games.api;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableTable;
+import com.google.common.collect.Iterables;
 
 import java.util.List;
 import java.util.Optional;
@@ -64,6 +65,10 @@ public final class Board {
         this.board = tableBuilder.build();
     }
 
+    public Board place(TokenPlacement placement) {
+        return new Board(firstColumn, width, firstRow, height, Iterables.concat(getTokenPlacements(), ImmutableList.of(placement)));
+    }
+
     public int getFirstColumn() {
         return firstColumn;
     }
@@ -94,6 +99,14 @@ public final class Board {
 
     public int getLastRow() {
         return firstRow + height - 1;
+    }
+
+    public boolean contains(Position position) {
+        return position.getRow() >= getFirstRow() && position.getRow() <= getLastRow() && position.getColumn() >= getFirstColumn() && position.getColumn() <= getLastColumn();
+    }
+
+    public boolean isCompletelyFilled() {
+        return board.values().size() == height * width;
     }
 
     @Override

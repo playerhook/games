@@ -16,6 +16,10 @@ public final class Position {
         this.column = column;
     }
 
+    public Position at(Direction direction) {
+        return new Position(row + direction.getRowDelta(), column + direction.getColumnDelta());
+    }
+
     public int getColumn() {
         return column;
     }
