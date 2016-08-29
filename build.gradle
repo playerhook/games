@@ -1,0 +1,77 @@
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "com.netflix.nebula:gradle-extra-configurations-plugin:3.1.0"
+    }
+}
+
+group = 'org.playerhook'
+version = '0.1.0'
+
+subprojects {
+
+    apply plugin: 'groovy'
+    apply plugin: 'checkstyle'
+    apply plugin: 'codenarc'
+    apply plugin: 'jacoco'
+    apply plugin: 'nebula.provided-base'
+
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
+    repositories {
+        jcenter()
+        mavenCentral()
+        maven {
+            url  'http://dl.bintray.com/jasan/space'
+        }
+    }
+
+    dependencies {
+        // immutable data structures should be preferred to any other data structures
+        compile group: 'com.google.guava', name: 'guava', version: '19.0'
+        // Observables should be preferred to other way of handling asynchronous code
+        compile group: 'io.reactivex', name: 'rxjava', version: '1.1.9'
+
+        compile group: 'space.jasan', name: 'groovy-closure-support', version: '0.2.0'
+
+        testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+        testCompile 'cglib:cglib-nodep:2.2'
+
+    }
+
+    checkstyle {
+        configFile = rootProject.file('config/checkstyle/checkstyle.xml')
+    }
+
+    codenarc {
+        configFile = rootProject.file('config/codenarc.xml')
+    }
+
+
+    if (System.getenv('CIRCLE_TEST_REPORTS')) {
+        File reportsDir = new File(project.buildDir, 'reports')
+        File jacocoDir = new File(project.buildDir, 'jacoco')
+        File testResultsDir = new File(project.buildDir, 'test-results')
+        task copyTestResults(type: Copy) {
+            from reportsDir.absolutePath
+            from jacocoDir
+            from testResultsDir
+            into "${System.getenv('CIRCLE_TEST_REPORTS')}/${project.name}/"
+        }
+
+        test {
+            reports {
+                junitXml.enabled = true
+                html.enabled = true
+            }
+        }
+
+        test.finalizedBy copyTestResults
+    }
+
+}

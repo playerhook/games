@@ -1,0 +1,8 @@
+dependencies {
+    // immutable data structures should be preferred to any other data structures
+    compile group: 'com.google.guava', name: 'guava', version: '19.0'
+    // Observables should be preferred to other way of handling asynchronous code
+    compile group: 'io.reactivex', name: 'rxjava', version: '1.1.9'
+    compile group: 'space.jasan', name: 'groovy-closure-support', version: '0.2.0'
+}
+
