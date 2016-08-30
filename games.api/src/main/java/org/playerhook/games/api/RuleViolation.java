@@ -29,4 +29,38 @@ public interface RuleViolation {
         }
     }
 
+    class Stub implements RuleViolation {
+        private final String code;
+
+        Stub(String code) {
+            this.code = code;
+        }
+
+        @Override
+        public String getCode() {
+            return code;
+        }
+
+        @Override
+        public String getMessage() {
+            return code;
+        }
+    }
+
+    static RuleViolation load(String code) {
+        if (code == null) {
+            return null;
+        }
+        for (Default d : Default.values()) {
+            if (d.getCode().equals(code)) {
+                return d;
+            }
+        }
+        return new Stub(code);
+    }
+
+    static boolean equals(RuleViolation token, RuleViolation another) {
+        return token.getCode().equals(another.getCode());
+    }
+
 }

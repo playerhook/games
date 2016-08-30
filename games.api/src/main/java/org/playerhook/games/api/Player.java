@@ -1,11 +1,15 @@
 package org.playerhook.games.api;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
+import org.playerhook.games.util.MapSerializable;
 
 import java.net.URL;
+import java.util.Map;
 import java.util.Optional;
 
-public final class Player {
+public final class Player implements MapSerializable {
 
     private final String username;
     private final URL avatar;
@@ -29,7 +33,7 @@ public final class Player {
     }
 
     private Player(String username, URL avatar, String displayName, String displayColor) {
-        this.username = username;
+        this.username = Preconditions.checkNotNull(username, "Username cannot be null");
         this.avatar = avatar;
         this.displayName = displayName;
         this.displayColor = displayColor;
@@ -71,5 +75,34 @@ public final class Player {
     @Override
     public int hashCode() {
         return Objects.hashCode(username);
+    }
+
+    @Override
+    public Map<String, Object> toMap() {
+        ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
+
+        builder.put("username", username);
+        getAvatar().ifPresent(url -> builder.put("avatar", url.toExternalForm()));
+        getDisplayName().ifPresent(displayName -> builder.put("displayName", displayName));
+        getDisplayColor().ifPresent(displayColor -> builder.put("displayColor", displayColor));
+
+        return builder.build();
+    }
+
+    static Player load(Object player) {
+        if (player == null) {
+            return null;
+        }
+        if (!(player instanceof Map)) {
+            throw new IllegalArgumentException("Cannot load player from " + player);
+        }
+        Map<String, Object> map = (Map<String, Object>) player;
+
+        return new Player(
+            RemoteSession.loadString(map, "username"),
+            RemoteSession.loadURL(map, "avatar"),
+            RemoteSession.loadString(map, "displayName"),
+            RemoteSession.loadString(map, "displayColor")
+        );
     }
 }

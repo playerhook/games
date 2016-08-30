@@ -1,14 +1,20 @@
 package org.playerhook.games.api;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Iterables;
 
-import java.util.List;
-import java.util.Optional;
+import org.playerhook.games.util.MapSerializable;
 
-public final class Board {
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+public final class Board implements MapSerializable {
 
     private int firstColumn;
     private int width;
@@ -51,6 +57,8 @@ public final class Board {
     }
 
     private Board(int firstColumn, int width, int firstRow, int height, Iterable<TokenPlacement> tokenPlacements) {
+        Preconditions.checkArgument(width > 0, "Width must be at least 1");
+        Preconditions.checkArgument(height > 0, "Height must be at least 1");
         this.firstColumn = firstColumn;
         this.width = width;
         this.firstRow = firstRow;
@@ -124,5 +132,33 @@ public final class Board {
     @Override
     public int hashCode() {
         return Objects.hashCode(firstColumn, width, firstRow, height, board);
+    }
+
+    public Map<String, Object> toMap() {
+        return ImmutableMap.of(
+            "firstColumn", firstColumn,
+            "width", width,
+            "firstRow", firstRow,
+            "height", height,
+            "tokenPlacements", getTokenPlacements().stream().map(TokenPlacement::toMap).collect(Collectors.toList())
+        );
+    }
+
+    static Board load(Object board) {
+        if (board == null) {
+            return null;
+        }
+        if (!(board instanceof Map)) {
+            throw new IllegalArgumentException("Cannot load board from " + board);
+        }
+        Map<String, Object> map = (Map<String, Object>) board;
+
+        return new Board(
+            RemoteSession.loadInteger(map, "firstColumn"),
+            RemoteSession.loadInteger(map, "width"),
+            RemoteSession.loadInteger(map, "firstRow"),
+            RemoteSession.loadInteger(map, "height"),
+            RemoteSession.loadList(map.getOrDefault("tokenPlacements", ImmutableList.of()), TokenPlacement::load)
+        );
     }
 }

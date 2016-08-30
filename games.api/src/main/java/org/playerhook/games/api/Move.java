@@ -1,11 +1,15 @@
 package org.playerhook.games.api;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
+import org.playerhook.games.util.MapSerializable;
 
 import java.time.Instant;
+import java.util.Map;
 import java.util.Optional;
 
-public final class Move {
+public final class Move implements MapSerializable {
 
     private final TokenPlacement tokenPlacement;
     private final RuleViolation ruleViolation;
@@ -28,9 +32,9 @@ public final class Move {
     }
 
     private Move(TokenPlacement tokenPlacement, RuleViolation ruleViolation, Instant timestamp) {
-        this.tokenPlacement = tokenPlacement;
+        this.tokenPlacement = Preconditions.checkNotNull(tokenPlacement, "Token placement cannot be null!");
+        this.timestamp = Preconditions.checkNotNull(timestamp, "timestamp cannot be null!");
         this.ruleViolation = ruleViolation;
-        this.timestamp = timestamp;
     }
 
     public TokenPlacement getTokenPlacement() {
@@ -70,5 +74,33 @@ public final class Move {
             builder.append(" causing ").append(ruleViolation.getMessage());
         }
         return builder.toString();
+    }
+
+    @Override
+    public Map<String, Object> toMap() {
+        ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
+
+        builder.put("tokenPlacement", tokenPlacement.toMap());
+        builder.put("timestamp", timestamp.toEpochMilli());
+
+        getRuleViolation().ifPresent(ruleViolation -> builder.put("ruleViolation", ruleViolation.getCode()));
+
+        return builder.build();
+    }
+
+    static Move load(Object move) {
+        if (move == null) {
+            return null;
+        }
+        if (!(move instanceof Map)) {
+            throw new IllegalArgumentException("Cannot load move from " + move);
+        }
+        Map<String, Object> map = (Map<String, Object>) move;
+
+        return new Move(
+            TokenPlacement.load(map.get("tokenPlacement")),
+            RuleViolation.load(RemoteSession.loadString(map, "ruleViolation")),
+            RemoteSession.loadInstant(map, "timestamp")
+        );
     }
 }

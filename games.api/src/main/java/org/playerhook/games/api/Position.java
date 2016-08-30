@@ -1,8 +1,12 @@
 package org.playerhook.games.api;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableMap;
+import org.playerhook.games.util.MapSerializable;
 
-public final class Position {
+import java.util.Map;
+
+public final class Position implements MapSerializable {
 
     private final int row;
     private final int column;
@@ -48,5 +52,25 @@ public final class Position {
     @Override
     public int hashCode() {
         return Objects.hashCode(row, column);
+    }
+
+    @Override
+    public Map<String, Object> toMap() {
+        return ImmutableMap.of("row", row, "column", column);
+    }
+
+    static Position load(Object position) {
+        if (position == null) {
+            return null;
+        }
+        if (!(position instanceof Map)) {
+            throw new IllegalArgumentException("Cannot load position from " + position);
+        }
+        Map<String, Object> map = (Map<String, Object>) position;
+
+        return new Position(
+            RemoteSession.loadInteger(map, "row"),
+            RemoteSession.loadInteger(map, "column")
+        );
     }
 }

@@ -1,1 +1,1 @@
-include 'games.api', 'games.tictactoe'
+include 'games.api', 'games.tictactoe', 'games.tictactoe.hook'

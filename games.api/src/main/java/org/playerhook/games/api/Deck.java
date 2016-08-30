@@ -1,9 +1,15 @@
 package org.playerhook.games.api;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import org.playerhook.games.util.MapSerializable;
 
-public final class Deck {
+import java.util.Map;
+import java.util.stream.Collectors;
+
+public final class Deck implements MapSerializable {
 
     private final ImmutableList<Token> tokens;
     private final int totalTokensAvailable;
@@ -21,6 +27,7 @@ public final class Deck {
     }
 
     private Deck(ImmutableList<Token> tokens, int totalTokensAvailable) {
+        Preconditions.checkArgument(totalTokensAvailable >= 0, "Total tokens available must be positive number");
         this.tokens = tokens;
         this.totalTokensAvailable = totalTokensAvailable;
     }
@@ -48,5 +55,25 @@ public final class Deck {
     @Override
     public int hashCode() {
         return Objects.hashCode(tokens, totalTokensAvailable);
+    }
+
+    @Override
+    public Map<String, Object> toMap() {
+        return ImmutableMap.of("tokens", tokens.stream().map(Token::getSymbol).collect(Collectors.toList()), "totalTokensAvailable", totalTokensAvailable);
+    }
+
+    static Deck load(Object deck) {
+        if (deck == null) {
+            return null;
+        }
+        if (!(deck instanceof Map)) {
+            throw new IllegalArgumentException("Cannot load deck from " + deck);
+        }
+        Map<String, Object> map = (Map<String, Object>) deck;
+
+        return new Deck(
+            RemoteSession.loadList(map.getOrDefault("tokens", ImmutableList.of()), o -> new Token.Stub(o.toString())),
+            RemoteSession.loadInteger(map, "totalTokensAvailable")
+        );
     }
 }

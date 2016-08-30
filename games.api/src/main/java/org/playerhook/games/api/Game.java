@@ -1,11 +1,15 @@
 package org.playerhook.games.api;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
+import org.playerhook.games.util.MapSerializable;
 
 import java.net.URL;
+import java.util.Map;
 import java.util.Optional;
 
-public final class Game {
+public final class Game implements MapSerializable {
 
     private final String title;
     private final String description;
@@ -39,13 +43,11 @@ public final class Game {
     }
 
     private Game(String title, int minPlayers, int maxPlayers, String description, URL url) {
-        if (minPlayers < 1) {
-            throw new IllegalArgumentException("There must be at least one player in each game!");
-        }
-        if (minPlayers > maxPlayers) {
-            throw new IllegalArgumentException("Minimum number of players must be greater or equal to maximum number of players!");
-        }
-        this.title = title;
+        Preconditions.checkArgument(minPlayers > 1, "There must be at least one player in each game!");
+        Preconditions.checkArgument(minPlayers <= maxPlayers, "Minimum number of players must be greater or equal to maximum number of players!");
+
+        this.title = Preconditions.checkNotNull(title, "Title cannot be null!");
+
         this.description = description;
         this.url = url;
         this.minPlayers = minPlayers;
@@ -93,5 +95,34 @@ public final class Game {
     @Override
     public String toString() {
         return "Game '" + title + "'";
+    }
+
+    @Override
+    public Map<String, Object> toMap() {
+        ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
+        builder.put("title", title);
+        getDescription().ifPresent(s -> builder.put("description", s));
+        getURL().ifPresent(s -> builder.put("url", s.toExternalForm()));
+        builder.put("maxPlayers", maxPlayers);
+        builder.put("minPlayers", minPlayers);
+        return builder.build();
+    }
+
+    static Game load(Object game) {
+        if (game == null) {
+            return null;
+        }
+        if (!(game instanceof Map)) {
+            throw new IllegalArgumentException("Cannot load game from " + game);
+        }
+        Map<String, Object> map = (Map<String, Object>) game;
+
+        return new Game(
+            RemoteSession.loadString(map, "title"),
+            RemoteSession.loadInteger(map, "minPlayers"),
+            RemoteSession.loadInteger(map, "maxPlayers"),
+            RemoteSession.loadString(map, "description"),
+            RemoteSession.loadURL(map, "url")
+        );
     }
 }
