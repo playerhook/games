@@ -3,16 +3,17 @@ package org.playerhook.games.tictactoe.hook.springboot;
 import com.google.common.collect.ImmutableList;
 import org.playerhook.games.api.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.net.URL;
 import java.security.SecureRandom;
 import java.util.Optional;
 
 @Service
-public class PlayService {
+public class GameService {
 
     public void sendPlacement(URL url, TokenPlacement placement) {
-        System.out.print("Sending " + placement + " to " + url);
+        new RestTemplate().postForObject(url.toExternalForm(), placement.toMap(), Acknowledgement.class);
     }
 
     public void playIfOnTurn(SessionUpdate update, String username) {
