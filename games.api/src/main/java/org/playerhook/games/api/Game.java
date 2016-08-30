@@ -44,7 +44,7 @@ public final class Game implements MapSerializable {
 
     private Game(String title, int minPlayers, int maxPlayers, String description, URL url) {
         Preconditions.checkArgument(minPlayers > 1, "There must be at least one player in each game!");
-        Preconditions.checkArgument(minPlayers <= maxPlayers, "Minimum number of players must be greater or equal to maximum number of players!");
+        Preconditions.checkArgument(minPlayers <= maxPlayers, "Minimum number at players must be greater or equal to maximum number at players!");
 
         this.title = Preconditions.checkNotNull(title, "Title cannot be null!");
 

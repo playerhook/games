@@ -1,11 +1,12 @@
-package org.playerhook.games.tictactoe.hook
+package org.playerhook.games.tictactoe.hook.springboot
 
-import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.playerhook.games.api.LocalSession
 import org.playerhook.games.api.Player
 import org.playerhook.games.api.Position
+import org.playerhook.games.api.SessionUpdate
+import org.playerhook.games.api.SessionUpdateType
 import org.playerhook.games.api.Token
 import org.playerhook.games.api.TokenPlacement
 import org.playerhook.games.tictactoe.TicTacToeSession
@@ -33,7 +34,7 @@ public class RandomControllerTest extends Specification {
 
     @Test void "test hook"() {
         SecureRandom random = new SecureRandom()
-        LocalSession session = new TicTacToeSession(3, 3)
+        LocalSession session = new TicTacToeSession(3, 3, new URL("http://www.example.com/game/session/xyz"))
 
         Player dartagnan = Player.create('dartagnan')
         Player athos = Player.create('athos')
@@ -48,16 +49,33 @@ public class RandomControllerTest extends Specification {
             int nextRow = session.board.firstRow + random.nextInt(session.board.height)
             int nextCol = session.board.firstColumn + random.nextInt(session.board.width)
             Token token = session.getDeck(onTurn).playableTokens.first()
-            session.play(TokenPlacement.of(token, onTurn, Position.of(nextRow, nextCol)))
+            session.play(TokenPlacement.create(token, onTurn, Position.at(nextRow, nextCol)))
         }
 
         when:
-            String jsonSession = json(session)
-            println jsonSession
-            this.mvc.perform(post("/tictactoe/random").content(jsonSession).accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk()).andExpect(content().json('{"id":1,"content":"Hello, Stranger!"}'))
+            String jsonSession = json(SessionUpdate.of(session, SessionUpdateType.Default.MOVE).toMap());
+            this.mvc.perform(post("/tictactoe/random?u=dartagnan").content(jsonSession).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk()).andExpect(content().json('{"acknowledged": true}'))
         then:
             noExceptionThrown()
+    }
+
+
+    private HttpMessageConverter mappingJackson2HttpMessageConverter
+
+    @Autowired
+    void setConverters(HttpMessageConverter<?>[] converters) {
+        mappingJackson2HttpMessageConverter = Arrays.asList(converters)
+            .stream().filter{ hmc -> hmc instanceof MappingJackson2HttpMessageConverter}.findAny().get()
+
+        assert this.mappingJackson2HttpMessageConverter
+    }
+
+    protected String json(Object o) throws IOException {
+        MockHttpOutputMessage mockHttpOutputMessage = new MockHttpOutputMessage();
+        this.mappingJackson2HttpMessageConverter.write(
+            o, MediaType.APPLICATION_JSON, mockHttpOutputMessage);
+        return mockHttpOutputMessage.getBodyAsString();
     }
 
 }

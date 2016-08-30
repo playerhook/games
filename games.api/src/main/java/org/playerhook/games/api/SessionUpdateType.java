@@ -57,6 +57,11 @@ public interface SessionUpdateType {
         public int hashCode() {
             return Objects.hashCode(code);
         }
+
+        @Override
+        public String toString() {
+            return getCode();
+        }
     }
 
 }

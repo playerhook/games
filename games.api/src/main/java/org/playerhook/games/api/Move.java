@@ -15,19 +15,19 @@ public final class Move implements MapSerializable {
     private final RuleViolation ruleViolation;
     private final Instant timestamp;
 
-    public static Move of(TokenPlacement tokenPlacement) {
-        return of(tokenPlacement, null, Instant.now());
+    public static Move to(TokenPlacement tokenPlacement) {
+        return to(tokenPlacement, null, Instant.now());
     }
 
-    public static Move of(TokenPlacement tokenPlacement, Instant timestamp) {
-        return of(tokenPlacement, null, timestamp);
+    public static Move to(TokenPlacement tokenPlacement, Instant timestamp) {
+        return to(tokenPlacement, null, timestamp);
     }
 
-    public static Move of(TokenPlacement tokenPlacement, RuleViolation ruleViolation) {
-        return of(tokenPlacement, ruleViolation, Instant.now());
+    public static Move to(TokenPlacement tokenPlacement, RuleViolation ruleViolation) {
+        return to(tokenPlacement, ruleViolation, Instant.now());
     }
 
-    public static Move of(TokenPlacement tokenPlacement, RuleViolation ruleViolation, Instant timestamp) {
+    public static Move to(TokenPlacement tokenPlacement, RuleViolation ruleViolation, Instant timestamp) {
         return new Move(tokenPlacement, ruleViolation, timestamp);
     }
 

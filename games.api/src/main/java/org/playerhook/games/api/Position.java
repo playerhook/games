@@ -11,7 +11,7 @@ public final class Position implements MapSerializable {
     private final int row;
     private final int column;
 
-    public static Position of(int row, int column) {
+    public static Position at(int row, int column) {
         return new Position(row, column);
     }
 

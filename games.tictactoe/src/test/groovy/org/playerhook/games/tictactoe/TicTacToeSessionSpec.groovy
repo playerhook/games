@@ -75,7 +75,7 @@ class TicTacToeSessionSpec extends Specification {
             int nextRow = session.board.firstRow + random.nextInt(session.board.height)
             int nextCol = session.board.firstColumn + random.nextInt(session.board.width)
             Token token = session.getDeck(onTurn).playableTokens.first()
-            session.play(TokenPlacement.of(token, onTurn, Position.of(nextRow, nextCol)))
+            session.play(TokenPlacement.create(token, onTurn, Position.at(nextRow, nextCol)))
         }
     }
 
@@ -108,7 +108,7 @@ class TicTacToeSessionSpec extends Specification {
         for (int row = session.board.firstRow; row <= session.board.lastRow; row++) {
             print '|'
             for (int col = session.board.firstColumn; col <= session.board.lastColumn; col++) {
-                Optional<TokenPlacement> optional = session.board.getTokenPlacement(Position.of(row, col))
+                Optional<TokenPlacement> optional = session.board.getTokenPlacement(Position.at(row, col))
                 if (optional.isPresent()) {
                     TokenPlacement tokenPlacement = optional.get()
                     String symbol = tokenPlacement.token.symbol

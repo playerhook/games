@@ -10,7 +10,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-public final class RemoteSession implements Session {
+final class RemoteSession implements Session {
 
     private final Board board;
     private final Game game;
@@ -113,7 +113,7 @@ public final class RemoteSession implements Session {
             try {
                 return new URL(o.toString());
             } catch (MalformedURLException e) {
-                throw new RuntimeException("Error parsing the game URL", e);
+                throw new RuntimeException("Error parsing the URL", e);
             }
         }).orElse(null);
     }

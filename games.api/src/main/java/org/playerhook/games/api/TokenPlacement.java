@@ -14,7 +14,7 @@ public final class TokenPlacement implements MapSerializable {
     private final Position source;
     private final Position destination;
 
-    public static TokenPlacement of(Token token, Player player, Position destination) {
+    public static TokenPlacement create(Token token, Player player, Position destination) {
         return new TokenPlacement(token, player, null, destination);
     }
 

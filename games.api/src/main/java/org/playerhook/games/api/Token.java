@@ -43,6 +43,11 @@ public interface Token {
         public int hashCode() {
             return Objects.hashCode(symbol);
         }
+
+        @Override
+        public String toString() {
+            return getSymbol();
+        }
     }
 
     static boolean equals(Token token, Token another) {

@@ -121,24 +121,24 @@ public abstract class AbstractSession implements LocalSession {
 
     protected boolean doGenericChecks(TokenPlacement placement) {
         if (Status.WAITING.equals(getStatus())) {
-            move(Move.of(placement, RuleViolation.Default.GAME_NOT_STARTED_YET));
+            move(Move.to(placement, RuleViolation.Default.GAME_NOT_STARTED_YET));
             return true;
         }
 
         Optional<Player> playerOnTurn = getPlayerOnTurn();
         if (playerOnTurn.isPresent() && !playerOnTurn.get().equals(placement.getPlayer())) {
-            move(Move.of(placement, RuleViolation.Default.NOT_YOUR_TURN));
+            move(Move.to(placement, RuleViolation.Default.NOT_YOUR_TURN));
             return true;
         }
         if (!getDeck(placement.getPlayer()).getPlayableTokens().contains(placement.getToken())) {
-            move(Move.of(placement, RuleViolation.Default.ILLEGAL_TOKEN));
+            move(Move.to(placement, RuleViolation.Default.ILLEGAL_TOKEN));
         }
         if (getBoard().getTokenPlacement(placement.getDestination()).isPresent()) {
-            move(Move.of(placement, RuleViolation.Default.POSITION_ALREADY_TAKEN));
+            move(Move.to(placement, RuleViolation.Default.POSITION_ALREADY_TAKEN));
             return true;
         }
         if (!getBoard().contains(placement.getDestination())) {
-            move(Move.of(placement, RuleViolation.Default.TOKEN_NOT_ALLOWED_ON_GIVEN_POSITION));
+            move(Move.to(placement, RuleViolation.Default.TOKEN_NOT_ALLOWED_ON_GIVEN_POSITION));
             return true;
         }
         return false;

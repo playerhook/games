@@ -45,6 +45,11 @@ public interface RuleViolation {
         public String getMessage() {
             return code;
         }
+
+        @Override
+        public String toString() {
+            return getMessage();
+        }
     }
 
     static RuleViolation load(String code) {

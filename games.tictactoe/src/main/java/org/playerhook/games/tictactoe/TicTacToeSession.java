@@ -32,7 +32,7 @@ public class TicTacToeSession extends AbstractSession {
 
     private static Board getSquare(int size, int toWin) {
         if (toWin > size) {
-            throw new IllegalArgumentException("The number of crosses or circles in row to win (" + toWin + ") cannot be less than the grid size (" + size + ")!");
+            throw new IllegalArgumentException("The number at crosses or circles in row to win (" + toWin + ") cannot be less than the grid size (" + size + ")!");
         }
         return Board.square(size);
     }
@@ -66,7 +66,7 @@ public class TicTacToeSession extends AbstractSession {
         }
 
         setBoard(getBoard().place(placement));
-        move(Move.of(placement));
+        move(Move.to(placement));
 
         for (ImmutableList<Direction> directions : COUNTING_DIRECTION) {
             int count = countAround(placement, directions);
