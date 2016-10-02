@@ -131,7 +131,11 @@ public final class Board implements MapSerializable {
     public boolean isCompletelyFilled() {
         for (int i = getFirstRow(); i <= getLastRow(); i++) {
             for (int j = getFirstColumn(); j < getLastColumn(); j++) {
-                ImmutableList<TokenPlacement> tokens = board.get(i,j);
+                ImmutableList<TokenPlacement> tokens = board.get(i, j);
+                if (tokens == null) {
+                    return false;
+                }
+
                 if (tokens.size() > 0) {
                     return false;
                 }

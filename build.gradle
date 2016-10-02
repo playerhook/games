@@ -1,16 +1,15 @@
 buildscript {
     repositories {
+        jcenter()
         maven {
             url "https://plugins.gradle.org/m2/"
         }
     }
     dependencies {
         classpath "com.netflix.nebula:gradle-extra-configurations-plugin:3.1.0"
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.2'
     }
 }
-
-group = 'org.playerhook'
-version = '0.1.0'
 
 subprojects {
 
@@ -19,9 +18,14 @@ subprojects {
     apply plugin: 'codenarc'
     apply plugin: 'jacoco'
     apply plugin: 'nebula.provided-base'
+    apply plugin: 'maven-publish'
+    apply plugin: 'com.jfrog.bintray'
 
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
+
+    group = 'org.playerhook'
+    version = '0.1.0-beta-02'
 
     repositories {
         jcenter()
@@ -74,4 +78,67 @@ subprojects {
         test.finalizedBy copyTestResults
     }
 
+
+    // publishing
+    publishing {
+        publications {
+            groovyMaven(MavenPublication) {
+                from components.java
+
+                artifact sourcesJar {
+                    classifier "sources"
+                }
+
+                artifact javadocJar {
+                    classifier "javadoc"
+                }
+            }
+        }
+    }
+
+// set bintrayUser & bintrayKey in gradle.properties
+    bintray {
+
+        user = getPropertyOrUseDefault('bintrayUser', 'fake_user')
+        key = getPropertyOrUseDefault('bintrayKey', 'fake_key')
+        publications = ['groovyMaven']
+
+        def projectName = project.name
+        def projectDescription = project.description
+
+        pkg {
+            websiteUrl = 'https://github.com/playerhook/games'
+            issueTrackerUrl = 'https://github.com/playerhook/games/issues'
+            vcsUrl = 'https://github.com/playerhook/games.git'
+
+            repo = 'maven' // or your repo name
+            userOrg = 'musketyr'
+            name = projectName       // somehow project.* doesn't work in this closure
+            desc = projectDescription
+            licenses = ['Apache-2.0']
+        }
+        // dryRun = true // whether to run this as dry-run, without deploying
+    }
+
+    // custom tasks for creating source/javadoc jars
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
+
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier = 'javadoc'
+        from javadoc.destinationDir
+    }
+
+    artifacts {
+        archives sourcesJar, javadocJar
+    }
+
+    bintrayUpload.dependsOn check
+
+}
+
+String getPropertyOrUseDefault(String propertyName, String defaultValue) {
+    hasProperty(propertyName) ? getProperty(propertyName) : defaultValue
 }
