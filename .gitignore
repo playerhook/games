@@ -1,5 +1,8 @@
-.gradle
-build/
+**/.gradle
+**/build/
+**/classes/
+**/node_modules/
+**/out/
 
 # Ignore Gradle GUI config
 gradle-app.setting
@@ -12,3 +15,18 @@ gradle-app.setting
 
 # idea
 **/.idea/**/*
+
+
+**/Thumbs.db
+**/.DS_Store
+**/.gradle
+**/build/
+**/.idea
+**/*.iml
+**/*.ipr
+**/*.iws
+**/.project
+**/.settings
+**/.classpath
+**/prodDb.mv.db
+
