@@ -2,16 +2,11 @@ package org.playerhook.games.api;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Iterables;
+import com.google.common.collect.*;
 
 import org.playerhook.games.util.MapSerializable;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public final class Board implements MapSerializable {
@@ -21,7 +16,7 @@ public final class Board implements MapSerializable {
     private int firstRow;
     private int height;
 
-    private final ImmutableTable<Integer, Integer, TokenPlacement> board;
+    private final ImmutableTable<Integer, Integer, ImmutableList<TokenPlacement>> board;
 
 
     public static Board square(int size, Iterable<TokenPlacement> tokenPlacements) {
@@ -64,10 +59,21 @@ public final class Board implements MapSerializable {
         this.firstRow = firstRow;
         this.height = height;
 
-        ImmutableTable.Builder<Integer, Integer, TokenPlacement> tableBuilder = ImmutableTable.builder();
+        Table<Integer, Integer, List<TokenPlacement>> table = HashBasedTable.create();
 
         for (TokenPlacement placement : tokenPlacements) {
-            tableBuilder.put(placement.getDestination().getRow(), placement.getDestination().getColumn(), placement);
+            List<TokenPlacement> tokens = table.get(placement.getDestination().getRow(), placement.getDestination().getColumn());
+            if (tokens == null) {
+                tokens = Lists.newArrayList();
+            }
+            tokens.add(placement);
+            table.put(placement.getDestination().getRow(), placement.getDestination().getColumn(), tokens);
+        }
+
+        ImmutableTable.Builder<Integer, Integer, ImmutableList<TokenPlacement>> tableBuilder = ImmutableTable.builder();
+
+        for (Table.Cell<Integer, Integer, List<TokenPlacement>> cell : table.cellSet()) {
+            tableBuilder.put(cell.getRowKey(), cell.getColumnKey(), ImmutableList.copyOf(cell.getValue()));
         }
 
         this.board = tableBuilder.build();
@@ -94,10 +100,19 @@ public final class Board implements MapSerializable {
     }
 
     public List<TokenPlacement> getTokenPlacements() {
-        return ImmutableList.copyOf(board.values());
+        return ImmutableList.copyOf(Iterables.concat(board.values()));
     }
 
     public Optional<TokenPlacement> getTokenPlacement(Position position) {
+        return Optional.ofNullable(board.get(position.getRow(), position.getColumn())).flatMap(tokenPlacements -> {
+            if (tokenPlacements.size() > 0) {
+                return Optional.of(tokenPlacements.get(0));
+            }
+            return Optional.empty();
+        });
+    }
+
+    public Optional<ImmutableList<TokenPlacement>> getTokenPlacements(Position position) {
         return Optional.ofNullable(board.get(position.getRow(), position.getColumn()));
     }
 
@@ -114,7 +129,15 @@ public final class Board implements MapSerializable {
     }
 
     public boolean isCompletelyFilled() {
-        return board.values().size() == height * width;
+        for (int i = getFirstRow(); i <= getLastRow(); i++) {
+            for (int j = getFirstColumn(); j < getLastColumn(); j++) {
+                ImmutableList<TokenPlacement> tokens = board.get(i,j);
+                if (tokens.size() > 0) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     @Override
