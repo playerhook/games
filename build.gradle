@@ -25,7 +25,7 @@ subprojects {
     targetCompatibility = 1.8
 
     group = 'org.playerhook'
-    version = '0.1.0-beta-02'
+    version = '0.1.0-alpha-01'
 
     repositories {
         jcenter()
@@ -112,7 +112,7 @@ subprojects {
             vcsUrl = 'https://github.com/playerhook/games.git'
 
             repo = 'maven' // or your repo name
-            userOrg = 'musketyr'
+            userOrg = 'playerhook'
             name = projectName       // somehow project.* doesn't work in this closure
             desc = projectDescription
             licenses = ['Apache-2.0']
