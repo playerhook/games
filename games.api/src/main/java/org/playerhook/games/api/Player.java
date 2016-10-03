@@ -89,7 +89,7 @@ public final class Player implements MapSerializable {
         return builder.build();
     }
 
-    static Player load(Object player) {
+    public static Player load(Object player) {
         if (player == null) {
             return null;
         }

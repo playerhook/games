@@ -59,7 +59,7 @@ public final class Position implements MapSerializable {
         return ImmutableMap.of("row", row, "column", column);
     }
 
-    static Position load(Object position) {
+    public static Position load(Object position) {
         if (position == null) {
             return null;
         }

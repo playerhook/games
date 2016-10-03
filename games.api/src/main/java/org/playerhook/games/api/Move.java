@@ -88,7 +88,7 @@ public final class Move implements MapSerializable {
         return builder.build();
     }
 
-    static Move load(Object move) {
+    public static Move load(Object move) {
         if (move == null) {
             return null;
         }

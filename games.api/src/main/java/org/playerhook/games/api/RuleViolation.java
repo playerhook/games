@@ -52,7 +52,7 @@ public interface RuleViolation {
         }
     }
 
-    static RuleViolation load(String code) {
+    public static RuleViolation load(String code) {
         if (code == null) {
             return null;
         }

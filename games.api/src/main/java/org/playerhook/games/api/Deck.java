@@ -70,7 +70,7 @@ public final class Deck implements MapSerializable {
         return ImmutableMap.of("tokens", tokens.stream().map(Token::getSymbol).collect(Collectors.toList()), "totalTokensAvailable", totalTokensAvailable);
     }
 
-    static Deck load(Object deck) {
+    public static Deck load(Object deck) {
         if (deck == null) {
             return null;
         }

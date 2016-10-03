@@ -6,7 +6,7 @@ public interface SessionUpdateType {
 
     String getCode();
 
-    static SessionUpdateType load(String code) {
+    public static SessionUpdateType load(String code) {
         if (code == null) {
             return null;
         }

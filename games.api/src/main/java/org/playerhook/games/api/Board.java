@@ -171,7 +171,7 @@ public final class Board implements MapSerializable {
         );
     }
 
-    static Board load(Object board) {
+    public static Board load(Object board) {
         if (board == null) {
             return null;
         }

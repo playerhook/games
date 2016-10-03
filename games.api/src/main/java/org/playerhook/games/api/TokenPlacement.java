@@ -60,7 +60,7 @@ public final class TokenPlacement implements MapSerializable {
         return builder.build();
     }
 
-    static TokenPlacement load(Object tokenPlacement) {
+    public static TokenPlacement load(Object tokenPlacement) {
         if (tokenPlacement == null) {
             return null;
         }
