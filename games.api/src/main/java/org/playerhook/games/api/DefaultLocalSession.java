@@ -164,5 +164,12 @@ final class DefaultLocalSession implements LocalSession {
         }
     }
 
-
+    @Override
+    public String toString() {
+        Optional<URL> url = getURL();
+        if (url.isPresent()) {
+            return "Session: " + url + " of " + getGame();
+        }
+        return "Unidentified session of " + getGame();
+    }
 }
