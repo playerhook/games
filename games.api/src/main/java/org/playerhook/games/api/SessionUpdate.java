@@ -31,8 +31,8 @@ public final class SessionUpdate implements MapSerializable {
     }
 
     @Override
-    public Map<String, Object> toMap() {
-        return ImmutableMap.of("session", session.toMap(), "type", type.getCode());
+    public Map<String, Object> toMap(boolean includeInternalState) {
+        return ImmutableMap.of("session", session.toMap(includeInternalState), "type", type.getCode());
     }
 
     public static SessionUpdate materialize(Object payload, BiConsumer<URL, TokenPlacement> onPlay) {

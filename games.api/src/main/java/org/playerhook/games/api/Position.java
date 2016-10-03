@@ -55,7 +55,7 @@ public final class Position implements MapSerializable {
     }
 
     @Override
-    public Map<String, Object> toMap() {
+    public Map<String, Object> toMap(boolean includeInternalState) {
         return ImmutableMap.of("row", row, "column", column);
     }
 

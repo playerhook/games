@@ -51,7 +51,7 @@ public class RandomControllerTest extends Specification {
         }
 
         when:
-            String jsonSession = JsonOutput.toJson(SessionUpdate.of(session, SessionUpdateType.Default.MOVE).toMap());
+            String jsonSession = JsonOutput.toJson(SessionUpdate.of(session, SessionUpdateType.Default.MOVE).toMap(false));
             this.mvc.perform(post("/tictactoe/random?u=${session.playerOnTurn.get().username}").content(jsonSession).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isAccepted()).andExpect(content().json('{"acknowledged": true}'))
         then:

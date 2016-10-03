@@ -66,7 +66,7 @@ public final class Deck implements MapSerializable {
     }
 
     @Override
-    public Map<String, Object> toMap() {
+    public Map<String, Object> toMap(boolean includeInternalState) {
         return ImmutableMap.of("tokens", tokens.stream().map(Token::getSymbol).collect(Collectors.toList()), "totalTokensAvailable", totalTokensAvailable);
     }
 

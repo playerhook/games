@@ -13,7 +13,7 @@ import java.util.Optional;
 public class GameService {
 
     public void sendPlacement(URL url, TokenPlacement placement) {
-        new RestTemplate().postForObject(url.toExternalForm(), placement.toMap(), Acknowledgement.class);
+        new RestTemplate().postForObject(url.toExternalForm(), placement.toMap(false), Acknowledgement.class);
     }
 
     public void playIfOnTurn(SessionUpdate update, String username) {

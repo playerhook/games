@@ -49,13 +49,13 @@ public final class TokenPlacement implements MapSerializable {
     }
 
     @Override
-    public Map<String, Object> toMap() {
+    public Map<String, Object> toMap(boolean includeInternalState) {
         ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
 
         builder.put("token", token.getSymbol());
-        builder.put("player", player.toMap());
-        getSource().ifPresent(source ->  builder.put("source", source.toMap()));
-        builder.put("destination", destination.toMap());
+        builder.put("player", player.toMap(includeInternalState));
+        getSource().ifPresent(source ->  builder.put("source", source.toMap(includeInternalState)));
+        builder.put("destination", destination.toMap(includeInternalState));
 
         return builder.build();
     }

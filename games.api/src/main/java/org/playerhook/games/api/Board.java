@@ -161,13 +161,13 @@ public final class Board implements MapSerializable {
         return Objects.hashCode(firstColumn, width, firstRow, height, board);
     }
 
-    public Map<String, Object> toMap() {
+    public Map<String, Object> toMap(boolean includeInternalState) {
         return ImmutableMap.of(
             "firstColumn", firstColumn,
             "width", width,
             "firstRow", firstRow,
             "height", height,
-            "tokenPlacements", getTokenPlacements().stream().map(TokenPlacement::toMap).collect(Collectors.toList())
+            "tokenPlacements", getTokenPlacements().stream().map((placement) -> placement.toMap(includeInternalState)).collect(Collectors.toList())
         );
     }
 

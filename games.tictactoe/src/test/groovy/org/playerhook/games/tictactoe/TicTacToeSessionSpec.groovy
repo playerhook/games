@@ -53,10 +53,10 @@ class TicTacToeSessionSpec extends Specification {
             )
 
             session.asObservable().subscribe {
-                Object map = it.toMap()
+                Object map = it.toMap(false)
                 String json = JsonOutput.prettyPrint(JsonOutput.toJson(map))
                 SessionUpdate update = materialize(new JsonSlurper().parseText(json)) { url, tokenPlacement -> }
-                String other = JsonOutput.prettyPrint(JsonOutput.toJson(update.toMap()))
+                String other = JsonOutput.prettyPrint(JsonOutput.toJson(update.toMap(false)))
                 assert json == other
             }
 

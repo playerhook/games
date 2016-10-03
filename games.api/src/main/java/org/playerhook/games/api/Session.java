@@ -31,18 +31,18 @@ public interface Session extends MapSerializable {
 
     void play(TokenPlacement placement);
 
-    @Override default Map<String, Object> toMap() {
+    @Override default Map<String, Object> toMap(boolean includeInternalState) {
         ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
 
-        builder.put("game", getGame().toMap());
-        builder.put("board", getBoard().toMap());
-        builder.put("players", getPlayers().stream().map(Player::toMap).collect(Collectors.toList()));
+        builder.put("game", getGame().toMap(includeInternalState));
+        builder.put("board", getBoard().toMap(includeInternalState));
+        builder.put("players", getPlayers().stream().map((player2) -> player2.toMap(includeInternalState)).collect(Collectors.toList()));
         builder.put("scores", ImmutableMap.copyOf(getPlayers().stream().collect(Collectors.toMap(Player::getUsername, this::getScore))));
-        builder.put("decks", ImmutableMap.copyOf(getPlayers().stream().collect(Collectors.toMap(Player::getUsername, (player1) -> getDeck(player1).toMap()))));
-        builder.put("playedMoves", getPlayedMoves().stream().map(Move::toMap).collect(Collectors.toList()));
+        builder.put("decks", ImmutableMap.copyOf(getPlayers().stream().collect(Collectors.toMap(Player::getUsername, (player1) -> getDeck(player1).toMap(includeInternalState)))));
+        builder.put("playedMoves", getPlayedMoves().stream().map((move) -> move.toMap(includeInternalState)).collect(Collectors.toList()));
         builder.put("status", getStatus().name());
 
-        getPlayerOnTurn().ifPresent(player -> builder.put("playerOnTurn", player.toMap()));
+        getPlayerOnTurn().ifPresent(player -> builder.put("playerOnTurn", player.toMap(includeInternalState)));
         getURL().ifPresent(s -> builder.put("url", s.toExternalForm()));
 
         return builder.build();

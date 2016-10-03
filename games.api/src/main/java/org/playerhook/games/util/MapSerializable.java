@@ -63,6 +63,6 @@ public interface MapSerializable {
         }).orElse(null);
     }
 
-    Map<String, Object> toMap();
+    Map<String, Object> toMap(boolean includeInternalState);
 
 }

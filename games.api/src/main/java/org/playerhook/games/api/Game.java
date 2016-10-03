@@ -74,7 +74,7 @@ public final class Game implements MapSerializable {
     }
 
     @Override
-    public Map<String, Object> toMap() {
+    public Map<String, Object> toMap(boolean includeInternalState) {
         ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
         builder.put("title", title);
         builder.put("rules", rules.getClass().getName());
