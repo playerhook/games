@@ -99,8 +99,8 @@ public final class Move implements MapSerializable {
 
         return new Move(
             TokenPlacement.load(map.get("tokenPlacement")),
-            RuleViolation.load(RemoteSession.loadString(map, "ruleViolation")),
-            RemoteSession.loadInstant(map, "timestamp")
+            RuleViolation.load(MapSerializable.loadString(map, "ruleViolation")),
+            MapSerializable.loadInstant(map, "timestamp")
         );
     }
 }

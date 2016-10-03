@@ -95,16 +95,16 @@ public final class Game implements MapSerializable {
         Rules rules;
 
         try {
-            rules = RemoteSession.loadRules(map, "rules");
+            rules = MapSerializable.loadRules(map, "rules");
         } catch(IllegalArgumentException e) {
             rules = Rules.NOT_FOUND;
         }
 
         return new Game(
-                RemoteSession.loadString(map, "title"),
+                MapSerializable.loadString(map, "title"),
                 rules,
-                RemoteSession.loadString(map, "description"),
-                RemoteSession.loadURL(map, "url")
+                MapSerializable.loadString(map, "description"),
+                MapSerializable.loadURL(map, "url")
         );
     }
 }

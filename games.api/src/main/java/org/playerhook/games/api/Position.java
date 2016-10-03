@@ -69,8 +69,8 @@ public final class Position implements MapSerializable {
         Map<String, Object> map = (Map<String, Object>) position;
 
         return new Position(
-            RemoteSession.loadInteger(map, "row"),
-            RemoteSession.loadInteger(map, "column")
+            MapSerializable.loadInteger(map, "row"),
+            MapSerializable.loadInteger(map, "column")
         );
     }
 }

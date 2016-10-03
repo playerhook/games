@@ -80,8 +80,8 @@ public final class Deck implements MapSerializable {
         Map<String, Object> map = (Map<String, Object>) deck;
 
         return new Deck(
-            RemoteSession.loadList(map.getOrDefault("tokens", ImmutableList.of()), o -> new Token.Stub(o.toString())),
-            RemoteSession.loadInteger(map, "totalTokensAvailable")
+            MapSerializable.loadList(map.getOrDefault("tokens", ImmutableList.of()), o -> new Token.Stub(o.toString())),
+            MapSerializable.loadInteger(map, "totalTokensAvailable")
         );
     }
 }

@@ -45,7 +45,7 @@ public final class SessionUpdate implements MapSerializable {
         Map<String, Object> map = (Map<String, Object>) payload;
         return new SessionUpdate(
             new RemoteSession(map.get("session"), onPlay),
-            SessionUpdateType.load(RemoteSession.loadString(map, "type"))
+            SessionUpdateType.load(MapSerializable.loadString(map, "type"))
         );
     }
 }

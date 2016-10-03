@@ -70,7 +70,7 @@ public final class TokenPlacement implements MapSerializable {
         Map<String, Object> map = (Map<String, Object>) tokenPlacement;
 
         return new TokenPlacement(
-            new Token.Stub(RemoteSession.loadString(map, "token")),
+            new Token.Stub(MapSerializable.loadString(map, "token")),
             Player.load(map.get("player")),
             Position.load(map.get("source")),
             Position.load(map.get("destination"))

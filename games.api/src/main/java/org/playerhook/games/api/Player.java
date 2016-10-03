@@ -99,10 +99,10 @@ public final class Player implements MapSerializable {
         Map<String, Object> map = (Map<String, Object>) player;
 
         return new Player(
-            RemoteSession.loadString(map, "username"),
-            RemoteSession.loadURL(map, "avatar"),
-            RemoteSession.loadString(map, "displayName"),
-            RemoteSession.loadString(map, "displayColor")
+            MapSerializable.loadString(map, "username"),
+            MapSerializable.loadURL(map, "avatar"),
+            MapSerializable.loadString(map, "displayName"),
+            MapSerializable.loadString(map, "displayColor")
         );
     }
 }

@@ -181,11 +181,11 @@ public final class Board implements MapSerializable {
         Map<String, Object> map = (Map<String, Object>) board;
 
         return new Board(
-            RemoteSession.loadInteger(map, "firstColumn"),
-            RemoteSession.loadInteger(map, "width"),
-            RemoteSession.loadInteger(map, "firstRow"),
-            RemoteSession.loadInteger(map, "height"),
-            RemoteSession.loadList(map.getOrDefault("tokenPlacements", ImmutableList.of()), TokenPlacement::load)
+            MapSerializable.loadInteger(map, "firstColumn"),
+            MapSerializable.loadInteger(map, "width"),
+            MapSerializable.loadInteger(map, "firstRow"),
+            MapSerializable.loadInteger(map, "height"),
+            MapSerializable.loadList(map.getOrDefault("tokenPlacements", ImmutableList.of()), TokenPlacement::load)
         );
     }
 }
