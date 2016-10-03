@@ -1,40 +1,62 @@
 package org.playerhook.games.api;
 
 import com.google.common.collect.ImmutableMap;
+import org.playerhook.games.util.MapSerializable;
 
+import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public interface Rules {
+public interface Rules extends MapSerializable {
 
-    Rules NOT_FOUND = new Rules() {
+    static Rules stub(String description, String type, int minPlayers, int maxPlayers) {
+        return new Stub(description, type, minPlayers, maxPlayers);
+    }
+
+    class Stub implements Rules {
+        private final String description;
+        private final String type;
+        private final int minPlayers;
+        private final int maxPlayers;
+
+        Stub(String description, String type, int minPlayers, int maxPlayers) {
+            this.description = description;
+            this.type = type;
+            this.minPlayers = minPlayers;
+            this.maxPlayers = maxPlayers;
+        }
+
         @Override
         public Deck prepareDeck(Session session, Player player) {
-            return Deck.of();
+            throw new UnsupportedOperationException("Rule implemenation is missing on the classpath");
         }
 
         @Override
         public EvaluationResult evaluate(Session session, TokenPlacement placement) {
-            return EvaluationResult.builder(placement).build();
+            throw new UnsupportedOperationException("Rule implemenation is missing on the classpath");
         }
 
         @Override
         public int getMinPlayers() {
-            return -1;
+            return minPlayers;
         }
 
         @Override
         public int getMaxPlayers() {
-            return -1;
+            return maxPlayers;
         }
 
         @Override
         public String getDescription() {
-            return "Rules not found!";
+            return description;
         }
-    };
 
+        @Override
+        public String getType() {
+            return type;
+        }
+    }
     class EvaluationResult {
 
         public static Builder builder(TokenPlacement placement) {
@@ -125,4 +147,50 @@ public interface Rules {
     int getMaxPlayers();
     String getDescription();
 
+    default String getType() {
+        return getClass().getName();
+    }
+
+    @Override
+    default Map<String, Object> toMap(boolean includeInternalState) {
+        ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
+
+        builder.put("description", getDescription());
+        builder.put("minPlayers", getMinPlayers());
+        builder.put("maxPlayers", getMaxPlayers());
+        builder.put("type", getType());
+
+        return builder.build();
+    }
+
+    static Rules load(Object rules) {
+        if (rules == null) {
+            return null;
+        }
+        if (!(rules instanceof Map)) {
+            throw new IllegalArgumentException("Cannot load rules from " + rules);
+        }
+        Map<String, Object> map = (Map<String, Object>) rules;
+
+        String ruleClassName = Optional
+                .ofNullable(map.get("type"))
+                .map(Object::toString)
+                .orElseThrow(() -> new IllegalArgumentException("rule is missing!"));
+
+        try {
+            Class<?> clazz = Class.forName(ruleClassName);
+            if (Rules.class.isAssignableFrom(clazz)) {
+                return (Rules) clazz.newInstance();
+            }
+            throw new IllegalArgumentException(ruleClassName + " is not a rule");
+        } catch (Exception e) {
+            return Rules.stub(
+                MapSerializable.loadString(map, "description"),
+                MapSerializable.loadString(map, "type"),
+                MapSerializable.loadInteger(map, "minPlayers"),
+                MapSerializable.loadInteger(map, "maxPlayers")
+            );
+        }
+
+    }
 }

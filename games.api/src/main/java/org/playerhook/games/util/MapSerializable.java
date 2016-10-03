@@ -1,7 +1,6 @@
 package org.playerhook.games.util;
 
 import com.google.common.collect.ImmutableList;
-import org.playerhook.games.api.Rules;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -30,23 +29,6 @@ public interface MapSerializable {
 
     static String loadString(Map<String, Object> map, String property) {
         return Optional.ofNullable(map.get(property)).map(Object::toString).orElse(null);
-    }
-
-    static Rules loadRules(Map<String, Object> map, String property) {
-        String ruleClassName = Optional.ofNullable(map.get(property)).map(Object::toString).orElseThrow(() -> new IllegalArgumentException(property + " is missing!"));
-        try {
-            Class<?> clazz = Class.forName(ruleClassName);
-            if (Rules.class.isAssignableFrom(clazz)) {
-                return (Rules) clazz.newInstance();
-            }
-            throw new IllegalArgumentException("Class " + ruleClassName + " is not a rule");
-        } catch (ClassNotFoundException e) {
-            throw new IllegalArgumentException("Rule class " + ruleClassName + " does not exist on the classpath");
-        } catch (InstantiationException e) {
-            throw new IllegalArgumentException("Rule class " + ruleClassName + " cannot be instantiated");
-        } catch (IllegalAccessException e) {
-            throw new IllegalArgumentException("Consturctor for class " + ruleClassName + " cannot be accessed");
-        }
     }
 
     static Instant loadInstant(Map<String, Object> map, String property) {

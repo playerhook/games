@@ -77,7 +77,7 @@ public final class Game implements MapSerializable {
     public Map<String, Object> toMap(boolean includeInternalState) {
         ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
         builder.put("title", title);
-        builder.put("rules", rules.getClass().getName());
+        builder.put("rules", rules.toMap(includeInternalState));
         getDescription().ifPresent(s -> builder.put("description", s));
         getURL().ifPresent(s -> builder.put("url", s.toExternalForm()));
         return builder.build();
@@ -92,17 +92,9 @@ public final class Game implements MapSerializable {
         }
         Map<String, Object> map = (Map<String, Object>) game;
 
-        Rules rules;
-
-        try {
-            rules = MapSerializable.loadRules(map, "rules");
-        } catch(IllegalArgumentException e) {
-            rules = Rules.NOT_FOUND;
-        }
-
         return new Game(
                 MapSerializable.loadString(map, "title"),
-                rules,
+                Rules.load(map.get("rules")),
                 MapSerializable.loadString(map, "description"),
                 MapSerializable.loadURL(map, "url")
         );
