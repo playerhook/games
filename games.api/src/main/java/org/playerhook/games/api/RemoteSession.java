@@ -17,7 +17,6 @@ final class RemoteSession implements Session {
     private final Status status;
     private final ImmutableList<Player> players;
     private final Player activePlayer;
-    private final Player winner;
     private final URL url;
     private final ImmutableList<Move> moves;
     private final ImmutableMap<Player, Deck> decks;
@@ -40,12 +39,10 @@ final class RemoteSession implements Session {
         this.game = Game.load(payload.getOrDefault("game", null));
         this.board = Board.load(payload.getOrDefault("board", null));
         this.activePlayer = Player.load(payload.getOrDefault("playerOnTurn", null));
-        this.winner = Player.load(payload.getOrDefault("winner", null));
         this.players = loadList(payload.getOrDefault("players", Collections.emptyList()), Player::load);
         this.moves = loadList(payload.getOrDefault("playedMoves", Collections.emptyList()), Move::load);
         this.status = Status.valueOf(payload.getOrDefault("status", Status.WAITING).toString());
         this.onPlay = onPlay;
-
         this.scores = loadScores(payload.getOrDefault("scores", Collections.emptyList()));
         this.decks = loadDecks(payload.getOrDefault("decks", Collections.emptyList()));
     }
@@ -104,6 +101,23 @@ final class RemoteSession implements Session {
         return Optional.ofNullable(map.get(property)).map(Object::toString).orElse(null);
     }
 
+    static Rules loadRules(Map<String, Object> map, String property) {
+        String ruleClassName = Optional.ofNullable(map.get(property)).map(Object::toString).orElseThrow(() -> new IllegalArgumentException(property + " is missing!"));
+        try {
+            Class<?> clazz = Class.forName(ruleClassName);
+            if (Rules.class.isAssignableFrom(clazz)) {
+                return (Rules) clazz.newInstance();
+            }
+            throw new IllegalArgumentException("Class " + ruleClassName + " is not a rule");
+        } catch (ClassNotFoundException e) {
+            throw new IllegalArgumentException("Rule class " + ruleClassName + " does not exist on the classpath");
+        } catch (InstantiationException e) {
+            throw new IllegalArgumentException("Rule class " + ruleClassName + " cannot be instantiated");
+        } catch (IllegalAccessException e) {
+            throw new IllegalArgumentException("Consturctor for class " + ruleClassName + " cannot be accessed");
+        }
+    }
+
     static Instant loadInstant(Map<String, Object> map, String property) {
         return Optional.ofNullable(map.get(property)).map(Object::toString).map(Long::parseLong).map(Instant::ofEpochMilli).orElseThrow(() -> new IllegalArgumentException("No " + property + "  for " + map));
     }
@@ -126,7 +140,7 @@ final class RemoteSession implements Session {
         return board;
     }
 
-    public List<Player> getPlayers() {
+    public ImmutableList<Player> getPlayers() {
         return ImmutableList.copyOf(players);
     }
 
@@ -134,11 +148,7 @@ final class RemoteSession implements Session {
         return Optional.ofNullable(activePlayer);
     }
 
-    public Optional<Player> getWinner() {
-        return Optional.ofNullable(winner);
-    }
-
-    public List<Move> getPlayedMoves() {
+    public ImmutableList<Move> getPlayedMoves() {
         return ImmutableList.copyOf(moves);
     }
 

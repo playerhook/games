@@ -6,13 +6,12 @@ import com.google.common.collect.Iterables;
 import rx.subjects.PublishSubject;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
-public abstract class AbstractSession implements LocalSession {
+final class DefaultLocalSession implements LocalSession {
 
-
+    private final Map<Player, Deck> decks = new HashMap<>();
+    private final Map<Player, Integer> scores = new HashMap<>();
     private final PublishSubject<SessionUpdate> subject = PublishSubject.create();
     private Board board;
     private Game game;
@@ -20,14 +19,7 @@ public abstract class AbstractSession implements LocalSession {
     private Status status = Status.WAITING;
     private List<Player> players = new ArrayList<>();
     private Player activePlayer;
-    private Player winner;
     private List<Move> moves = new ArrayList<>();
-
-    protected AbstractSession(Game game, Board board, URL url) {
-        this.game = Preconditions.checkNotNull(game, "Game cannot be null");
-        this.board = Preconditions.checkNotNull(board, "Board cannot be null");
-        this.url = url;
-    }
 
     public Game getGame() {
         return game;
@@ -41,11 +33,7 @@ public abstract class AbstractSession implements LocalSession {
         return board;
     }
 
-    protected void setBoard(Board board) {
-        this.board = board;
-    }
-
-    public List<Player> getPlayers() {
+    public ImmutableList<Player> getPlayers() {
         return ImmutableList.copyOf(players);
     }
 
@@ -53,11 +41,7 @@ public abstract class AbstractSession implements LocalSession {
         return Optional.ofNullable(activePlayer);
     }
 
-    public Optional<Player> getWinner() {
-        return Optional.ofNullable(winner);
-    }
-
-    public List<Move> getPlayedMoves() {
+    public ImmutableList<Move> getPlayedMoves() {
         return ImmutableList.copyOf(moves);
     }
 
@@ -69,7 +53,7 @@ public abstract class AbstractSession implements LocalSession {
         return subject;
     }
 
-    protected void changeState(Status status) {
+    private void changeState(Status status) {
         this.status = status;
         subject.onNext(SessionUpdate.of(this, SessionUpdateType.Default.STATUS));
         if (status == Status.FINISHED) {
@@ -77,23 +61,9 @@ public abstract class AbstractSession implements LocalSession {
         }
     }
 
-    protected void move(Move move) {
-        if (moves.size() > 0) {
-            Move last = Iterables.getLast(moves);
-            if (last.getRuleViolation().isPresent() && last.getTokenPlacement().getPlayer().equals(move.getTokenPlacement().getPlayer())) {
-                moves.remove(moves.size() - 1);
-            }
-        }
+    private void move(Move move) {
         moves.add(move);
         subject.onNext(SessionUpdate.of(this, SessionUpdateType.Default.MOVE));
-    }
-
-    protected void setWinner(Player winner) {
-        this.winner = winner;
-    }
-
-    protected void setActivePlayer(Player activePlayer) {
-        this.activePlayer = activePlayer;
     }
 
     @Override
@@ -112,14 +82,14 @@ public abstract class AbstractSession implements LocalSession {
     @Override
     public void start() {
         if (canStart()) {
-            setActivePlayer(Iterables.getFirst(getPlayers(), null));
+            this.activePlayer = Iterables.getFirst(getPlayers(), null);
             changeState(Status.IN_PROGRESS);
             return;
         }
         throw new IllegalStateException("Not enough players!");
     }
 
-    protected boolean doGenericChecks(TokenPlacement placement) {
+    private boolean doGenericChecks(TokenPlacement placement) {
         if (Status.WAITING.equals(getStatus())) {
             move(Move.to(placement, RuleViolation.Default.GAME_NOT_STARTED_YET));
             return true;
@@ -143,5 +113,56 @@ public abstract class AbstractSession implements LocalSession {
         }
         return false;
     }
+
+    DefaultLocalSession(Game game, Board board, URL url) {
+        this.game = Preconditions.checkNotNull(game, "Game cannot be null");
+        this.board = Preconditions.checkNotNull(board, "Board cannot be null");
+        this.url = url;
+    }
+
+    @Override
+    public Deck getDeck(Player player) {
+        Deck deck = decks.getOrDefault(player, getGame().getRules().prepareDeck(this, player));
+        decks.put(player, deck);
+        return deck;
+    }
+
+    @Override
+    public int getScore(Player player) {
+        return scores.getOrDefault(player, 0);
+    }
+
+    @Override
+    public void play(TokenPlacement placement) {
+        if (doGenericChecks(placement)) {
+            return;
+        }
+
+        Rules.EvaluationResult result = getGame().getRules().evaluate(this, placement);
+
+        Move move = result.getMove();
+
+        if (move.getRuleViolation().isPresent()) {
+            return;
+        }
+
+        this.board = getBoard().place(placement);
+        move(move);
+
+        for(Map.Entry<Player, Integer> scoreEntry : result.getScoreUpdates().entrySet()) {
+            Integer nextScore = scores.getOrDefault(scoreEntry.getKey(), 0);
+            nextScore += scoreEntry.getValue();
+            scores.put(scoreEntry.getKey(), nextScore);
+        }
+
+        if (!result.getNextStatus().map(status -> status.equals(getStatus())).orElse(false)) {
+            result.getNextStatus().ifPresent(this::changeState);
+        }
+
+        if (!result.getNextPlayer().equals(activePlayer)) {
+            this.activePlayer = result.getNextPlayer();
+        }
+    }
+
 
 }

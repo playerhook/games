@@ -13,49 +13,34 @@ public final class Game implements MapSerializable {
 
     private final String title;
     private final String description;
+    private final Rules rules;
     private final URL url;
 
-    private final int maxPlayers;
-    private final int minPlayers;
-
-    public static Game of(String title, int numberOfPlayers) {
-        return new Game(title, numberOfPlayers, numberOfPlayers, null, null);
+    public static Game of(String title, Rules rules) {
+        return new Game(title, rules, null, null);
     }
 
-    public static Game of(String title, int numberOfPlayers, String description) {
-        return new Game(title, numberOfPlayers, numberOfPlayers, description, null);
+    public static Game of(String title, String description, Rules rules) {
+        return new Game(title, rules, description, null);
     }
 
-    public static Game of(String title, int numberOfPlayers, String description, URL url) {
-        return new Game(title, numberOfPlayers, numberOfPlayers, description, url);
+    public static Game of(String title, String description, URL url, Rules rules) {
+        return new Game(title, rules, description, url);
     }
 
-    public static Game of(String title, int minPlayers, int maxPlayers) {
-        return new Game(title, minPlayers, maxPlayers, null, null);
-    }
-
-    public static Game of(String title, int minPlayers, int maxPlayers, String description) {
-        return new Game(title, minPlayers, maxPlayers, description, null);
-    }
-
-    public static Game of(String title, int minPlayers, int maxPlayers, String description, URL url) {
-        return new Game(title, minPlayers, maxPlayers, description, url);
-    }
-
-    private Game(String title, int minPlayers, int maxPlayers, String description, URL url) {
-        Preconditions.checkArgument(minPlayers > 1, "There must be at least one player in each game!");
-        Preconditions.checkArgument(minPlayers <= maxPlayers, "Minimum number at players must be greater or equal to maximum number at players!");
-
+    private Game(String title, Rules rules, String description, URL url) {
         this.title = Preconditions.checkNotNull(title, "Title cannot be null!");
-
         this.description = description;
         this.url = url;
-        this.minPlayers = minPlayers;
-        this.maxPlayers = maxPlayers;
+        this.rules = Preconditions.checkNotNull(rules, "Rules cannot be null");
     }
 
     public String getTitle() {
         return title;
+    }
+
+    public Rules getRules() {
+        return rules;
     }
 
     public Optional<String> getDescription() {
@@ -64,15 +49,6 @@ public final class Game implements MapSerializable {
 
     public Optional<URL> getURL() {
         return Optional.ofNullable(url);
-    }
-
-
-    public int getMaxPlayers() {
-        return maxPlayers;
-    }
-
-    public int getMinPlayers() {
-        return minPlayers;
     }
 
     @Override
@@ -101,10 +77,9 @@ public final class Game implements MapSerializable {
     public Map<String, Object> toMap() {
         ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
         builder.put("title", title);
+        builder.put("rules", rules.getClass().getName());
         getDescription().ifPresent(s -> builder.put("description", s));
         getURL().ifPresent(s -> builder.put("url", s.toExternalForm()));
-        builder.put("maxPlayers", maxPlayers);
-        builder.put("minPlayers", minPlayers);
         return builder.build();
     }
 
@@ -117,12 +92,19 @@ public final class Game implements MapSerializable {
         }
         Map<String, Object> map = (Map<String, Object>) game;
 
+        Rules rules;
+
+        try {
+            rules = RemoteSession.loadRules(map, "rules");
+        } catch(IllegalArgumentException e) {
+            rules = Rules.NOT_FOUND;
+        }
+
         return new Game(
-            RemoteSession.loadString(map, "title"),
-            RemoteSession.loadInteger(map, "minPlayers"),
-            RemoteSession.loadInteger(map, "maxPlayers"),
-            RemoteSession.loadString(map, "description"),
-            RemoteSession.loadURL(map, "url")
+                RemoteSession.loadString(map, "title"),
+                rules,
+                RemoteSession.loadString(map, "description"),
+                RemoteSession.loadURL(map, "url")
         );
     }
 }

@@ -26,6 +26,14 @@ public final class Deck implements MapSerializable {
         return new Deck(ImmutableList.copyOf(tokens), Integer.MAX_VALUE);
     }
 
+    public static Deck ofSame(Token token, int total) {
+        ImmutableList.Builder<Token> tokens = ImmutableList.builder();
+        for (int i = 0; i < total; i++) {
+            tokens.add(token);
+        }
+        return new Deck(tokens.build(), Integer.MAX_VALUE);
+    }
+
     private Deck(ImmutableList<Token> tokens, int totalTokensAvailable) {
         Preconditions.checkArgument(totalTokensAvailable >= 0, "Total tokens available must be positive number");
         this.tokens = tokens;

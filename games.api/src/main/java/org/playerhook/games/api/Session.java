@@ -1,10 +1,10 @@
 package org.playerhook.games.api;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.playerhook.games.util.MapSerializable;
 
 import java.net.URL;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -12,10 +12,9 @@ import java.util.stream.Collectors;
 public interface Session extends MapSerializable {
     Game getGame();
     Board getBoard();
-    List<Player> getPlayers();
+    ImmutableList<Player> getPlayers();
     Optional<Player> getPlayerOnTurn();
-    Optional<Player> getWinner();
-    List<Move> getPlayedMoves();
+    ImmutableList<Move> getPlayedMoves();
     Status getStatus();
     Optional<URL> getURL();
 
@@ -44,7 +43,6 @@ public interface Session extends MapSerializable {
         builder.put("status", getStatus().name());
 
         getPlayerOnTurn().ifPresent(player -> builder.put("playerOnTurn", player.toMap()));
-        getWinner().ifPresent(player -> builder.put("winner", player.toMap()));
         getURL().ifPresent(s -> builder.put("url", s.toExternalForm()));
 
         return builder.build();

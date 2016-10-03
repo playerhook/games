@@ -10,7 +10,7 @@ import org.playerhook.games.api.SessionUpdate
 import org.playerhook.games.api.SessionUpdateType
 import org.playerhook.games.api.Token
 import org.playerhook.games.api.TokenPlacement
-import org.playerhook.games.tictactoe.TicTacToeSession
+import org.playerhook.games.tictactoe.TicTacToeRules
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.MediaType
@@ -32,7 +32,7 @@ public class RandomControllerTest extends Specification {
 
     @Test void "test hook"() {
         SecureRandom random = new SecureRandom()
-        LocalSession session = new TicTacToeSession(3, 3, new URL("http://private-f8637-playerhook.apiary-mock.com/games/session/xyz"))
+        LocalSession session = TicTacToeRules.matchThree(null, new URL("http://private-f8637-playerhook.apiary-mock.com/games/session/xyz"))
 
         Player dartagnan = Player.create('dartagnan')
         Player athos = Player.create('athos')

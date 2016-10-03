@@ -22,7 +22,10 @@ class TicTacToeSessionSpec extends Specification {
 
     void "sanity check"() {
         when:
-            LocalSession session = new TicTacToeSession(3, 3)
+            LocalSession session = TicTacToeRules.matchThree(
+                    new URL('http://www.example.com/ttt'),
+                    new URL('http://www.example.com/ttt/123')
+            )
 
             session.asObservable().subscribe {
                 printSession(it)
@@ -44,7 +47,10 @@ class TicTacToeSessionSpec extends Specification {
 
     void "sanity check - to map"() {
         when:
-            LocalSession session = new TicTacToeSession(3, 3, new URL('http://example.com/abc'))
+            LocalSession session = TicTacToeRules.matchThree(
+                    new URL('http://www.example.com/ttt'),
+                    new URL('http://www.example.com/ttt/123')
+            )
 
             session.asObservable().subscribe {
                 Object map = it.toMap()

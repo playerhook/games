@@ -21,6 +21,8 @@ subprojects {
     apply plugin: 'maven-publish'
     apply plugin: 'com.jfrog.bintray'
 
+    logger.info(System.getProperty("java.home"))
+
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
 
