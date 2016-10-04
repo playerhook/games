@@ -29,12 +29,17 @@ public interface Rules extends MapSerializable {
 
         @Override
         public Deck prepareDeck(Session session, Player player) {
-            throw new UnsupportedOperationException("Rule implemenation is missing on the classpath");
+            throw new UnsupportedOperationException("Rule implemenation for " + getType() + " is missing on the classpath");
         }
 
         @Override
         public EvaluationResult evaluate(Session session, TokenPlacement placement) {
-            throw new UnsupportedOperationException("Rule implemenation is missing on the classpath");
+            throw new UnsupportedOperationException("Rule implemenation for " + getType() + " is missing on the classpath");
+        }
+
+        @Override
+        public Board prepareBoard() {
+            throw new UnsupportedOperationException("Rule implemenation for " + getType() + " is missing on the classpath");
         }
 
         @Override
@@ -142,6 +147,7 @@ public interface Rules extends MapSerializable {
     }
 
     Deck prepareDeck(Session session, Player player);
+    Board prepareBoard();
     EvaluationResult evaluate(Session session, TokenPlacement placement);
     int getMinPlayers();
     int getMaxPlayers();

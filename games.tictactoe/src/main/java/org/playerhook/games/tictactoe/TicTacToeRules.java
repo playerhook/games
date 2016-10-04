@@ -13,19 +13,19 @@ public class TicTacToeRules implements Rules {
     private static final String GAME_DESCRIPTION = "Create line of tokens to win";
 
     public static LocalSession matchThree(URL gameUrl, URL sessionUrl) {
-        return newSession(Game.of(GAME_NAME, GAME_DESCRIPTION, gameUrl, new Three()), Board.square(5), sessionUrl);
+        return newSession(Game.of(GAME_NAME, GAME_DESCRIPTION, gameUrl, new Three()), sessionUrl);
     }
 
     public static LocalSession matchFour(URL gameUrl, URL sessionUrl) {
-        return newSession(Game.of(GAME_NAME, GAME_DESCRIPTION, gameUrl, new Four()), Board.square(7), sessionUrl);
+        return newSession(Game.of(GAME_NAME, GAME_DESCRIPTION, gameUrl, new Four()), sessionUrl);
     }
 
     public static LocalSession matchFive(URL gameUrl, URL sessionUrl) {
-        return newSession(Game.of(GAME_NAME, GAME_DESCRIPTION, gameUrl, new Five()), Board.square(10), sessionUrl);
+        return newSession(Game.of(GAME_NAME, GAME_DESCRIPTION, gameUrl, new Five()), sessionUrl);
     }
 
     public static LocalSession matchSix(URL gameUrl, URL sessionUrl) {
-        return newSession(Game.of(GAME_NAME, GAME_DESCRIPTION, gameUrl, new Six()), Board.square(15), sessionUrl);
+        return newSession(Game.of(GAME_NAME, GAME_DESCRIPTION, gameUrl, new Six()), sessionUrl);
     }
 
     public static class Three extends TicTacToeRules {
@@ -61,8 +61,13 @@ public class TicTacToeRules implements Rules {
 
     private final int toWin;
 
-    TicTacToeRules(int toWin) {
+    private TicTacToeRules(int toWin) {
         this.toWin = toWin;
+    }
+
+    @Override
+    public Board prepareBoard() {
+        return Board.square((int) Math.round(toWin * 2.5));
     }
 
     @Override

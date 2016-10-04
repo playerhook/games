@@ -6,8 +6,8 @@ import java.net.URL;
 
 public interface LocalSession extends Session {
 
-    static LocalSession newSession(Game game, Board board, URL url) {
-        return new DefaultLocalSession(game, board, url);
+    static LocalSession newSession(Game game, URL url) {
+        return new DefaultLocalSession(game, url);
     }
 
     void join(Player newPlayer);

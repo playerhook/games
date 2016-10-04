@@ -114,9 +114,9 @@ final class DefaultLocalSession implements LocalSession {
         return false;
     }
 
-    DefaultLocalSession(Game game, Board board, URL url) {
+    DefaultLocalSession(Game game, URL url) {
         this.game = Preconditions.checkNotNull(game, "Game cannot be null");
-        this.board = Preconditions.checkNotNull(board, "Board cannot be null");
+        this.board = game.getRules().prepareBoard();
         this.url = url;
     }
 
