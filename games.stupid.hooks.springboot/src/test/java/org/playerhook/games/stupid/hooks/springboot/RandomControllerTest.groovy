@@ -1,4 +1,4 @@
-package org.playerhook.games.tictactoe.hook.springboot
+package org.playerhook.games.stupid.hooks.springboot
 
 import groovy.json.JsonOutput
 import org.junit.Test

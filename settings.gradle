@@ -1,1 +1,1 @@
-include 'games.api', 'games.tictactoe', 'games.tictactoe.hook.springboot'
+include 'games.api', 'games.tictactoe', 'games.stupid.hooks.springboot'
