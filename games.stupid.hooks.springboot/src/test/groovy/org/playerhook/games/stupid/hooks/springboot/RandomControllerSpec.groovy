@@ -58,7 +58,7 @@ class RandomControllerSpec extends Specification {
             String jsonSession = toJson(of(session, SessionUpdateType.Default.MOVE).toMap(false))
 
             this.mvc.perform(
-                    post("/tictactoe/random?u=${session.playerOnTurn.get().username}")
+                    post("/random?u=${session.playerOnTurn.get().username}")
                     .content(jsonSession)
                     .accept(MediaType.APPLICATION_JSON)
             ).andExpect(
