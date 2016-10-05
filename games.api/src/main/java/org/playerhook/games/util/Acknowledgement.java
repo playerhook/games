@@ -1,5 +1,8 @@
-package org.playerhook.games.stupid.hooks.springboot;
+package org.playerhook.games.util;
 
+/**
+ * Class used to represent the response from the web service in hooks.
+ */
 public class Acknowledgement {
 
     public static final Acknowledgement ACKNOWLEDGED = new Acknowledgement(true);

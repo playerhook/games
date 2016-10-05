@@ -1,6 +1,7 @@
 package org.playerhook.games.stupid.hooks.springboot;
 
 import org.playerhook.games.api.*;
+import org.playerhook.games.util.Acknowledgement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.json.BasicJsonParser;
 import org.springframework.http.HttpStatus;
@@ -16,7 +17,8 @@ public class RandomController {
 
     @RequestMapping(method=RequestMethod.POST)
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public @ResponseBody Acknowledgement playIfOnTurn(@RequestBody String body, @RequestParam("u") String username) {
+    public @ResponseBody
+    Acknowledgement playIfOnTurn(@RequestBody String body, @RequestParam("u") String username) {
         SessionUpdate update = SessionUpdate.materialize(new BasicJsonParser().parseMap(body), gameService::sendPlacement);
         gameService.playIfOnTurn(update, username);
         return Acknowledgement.ACKNOWLEDGED;

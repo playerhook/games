@@ -10,7 +10,7 @@ buildscript {
 apply plugin: 'spring-boot'
 
 jar {
-    baseName = 'games.tictactoe.hook.springboot'
+    baseName = 'games.stupid.hooks.springboot'
 }
 
 dependencies {

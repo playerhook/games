@@ -2,6 +2,7 @@ package org.playerhook.games.stupid.hooks.springboot;
 
 import com.google.common.collect.ImmutableList;
 import org.playerhook.games.api.*;
+import org.playerhook.games.util.Acknowledgement;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
