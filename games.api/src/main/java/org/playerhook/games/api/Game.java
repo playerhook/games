@@ -83,7 +83,7 @@ public final class Game implements MapSerializable {
         return builder.build();
     }
 
-    static Game load(Object game) {
+    public static Game load(Object game) {
         if (game == null) {
             return null;
         }

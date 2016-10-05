@@ -7,6 +7,7 @@ import org.playerhook.games.util.MapSerializable;
 import java.net.URL;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 public interface Session extends MapSerializable {
@@ -46,5 +47,9 @@ public interface Session extends MapSerializable {
         getURL().ifPresent(s -> builder.put("url", s.toExternalForm()));
 
         return builder.build();
+    }
+
+    static Session load(Object session, BiConsumer<URL, TokenPlacement> onPlay) {
+        return new RemoteSession(session, onPlay);
     }
 }

@@ -22,4 +22,8 @@ public interface LocalSession extends Session {
         return getPlayers().size() >= getGame().getRules().getMinPlayers() && getPlayers().size() <= getGame().getRules().getMaxPlayers();
     }
 
+
+    static LocalSession load(Object session) {
+        return DefaultLocalSession.load(session);
+    }
 }

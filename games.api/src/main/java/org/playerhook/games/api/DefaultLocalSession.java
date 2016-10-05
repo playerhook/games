@@ -2,7 +2,9 @@ package org.playerhook.games.api;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import org.playerhook.games.util.MapSerializable;
 import rx.subjects.PublishSubject;
 
 import java.net.URL;
@@ -13,13 +15,15 @@ final class DefaultLocalSession implements LocalSession {
     private final Map<Player, Deck> decks = new HashMap<>();
     private final Map<Player, Integer> scores = new HashMap<>();
     private final PublishSubject<SessionUpdate> subject = PublishSubject.create();
+    private final Game game;
+    private final URL url;
+
+    private final List<Player> players = new ArrayList<>();
+    private final List<Move> moves = new ArrayList<>();
+
     private Board board;
-    private Game game;
-    private URL url;
     private Status status = Status.WAITING;
-    private List<Player> players = new ArrayList<>();
     private Player activePlayer;
-    private List<Move> moves = new ArrayList<>();
 
     public Game getGame() {
         return game;
@@ -120,6 +124,30 @@ final class DefaultLocalSession implements LocalSession {
         this.url = url;
     }
 
+    /**
+     * Deserialization constructor.
+     */
+    DefaultLocalSession(Game game,
+                        Board board,
+                        URL url,
+                        Map<Player, Deck> decks,
+                        Map<Player, Integer> scores,
+                        List<Player> players,
+                        List<Move> moves,
+                        Status status,
+                        Player activePlayer) {
+        this.game = game;
+        this.board = board;
+        this.url = url;
+        this.status = status;
+        this.activePlayer = activePlayer;
+
+        this.decks.putAll(decks);
+        this.scores.putAll(scores);
+        this.players.addAll(players);
+        this.moves.addAll(moves);
+    }
+
     @Override
     public Deck getDeck(Player player) {
         Deck deck = decks.getOrDefault(player, getGame().getRules().prepareDeck(this, player));
@@ -171,5 +199,68 @@ final class DefaultLocalSession implements LocalSession {
             return "Session: " + url + " of " + getGame();
         }
         return "Unidentified session of " + getGame();
+    }
+
+    static LocalSession load(Object session) {
+        if (!(session instanceof Map)) {
+            throw new IllegalArgumentException("Cannot load session from " + session);
+        }
+
+        Map<String, Object> payload = (Map<String, Object>) session;
+
+        URL url = MapSerializable.loadURL(payload, "url");
+        Game game = Game.load(payload.getOrDefault("game", null));
+        Board board = Board.load(payload.getOrDefault("board", null));
+        Player activePlayer = Player.load(payload.getOrDefault("playerOnTurn", null));
+        List<Player> players = MapSerializable.loadList(payload.getOrDefault("players", Collections.emptyList()), Player::load);
+        List<Move> moves = MapSerializable.loadList(payload.getOrDefault("playedMoves", Collections.emptyList()), Move::load);
+        Status status = Status.valueOf(payload.getOrDefault("status", Status.WAITING).toString());
+        ImmutableMap<Player, Integer> scores = loadScores(players, payload.getOrDefault("scores", Collections.emptyList()));
+        ImmutableMap<Player, Deck> decks = loadDecks(players, payload.getOrDefault("decks", Collections.emptyList()));
+
+        return new DefaultLocalSession(
+                game,
+                board,
+                url,
+                decks,
+                scores,
+                players,
+                moves,
+                status,
+                activePlayer
+        );
+    }
+
+    private static Player findPlayer(List<Player> players, String username) {
+        return players.stream()
+                .filter(player -> player.getUsername().equals(username))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Player not present: " + username));
+    }
+
+    private static ImmutableMap<Player, Integer> loadScores(List<Player> players, Object map) {
+        if (!(map instanceof Map)) {
+            return ImmutableMap.of();
+        }
+        ImmutableMap.Builder<Player, Integer> builder = ImmutableMap.builder();
+
+        for (Map.Entry<String, Integer> o : ((Map<String, Integer>) map).entrySet()) {
+            builder.put(findPlayer(players, o.getKey()), o.getValue());
+        }
+
+        return builder.build();
+    }
+
+    private static ImmutableMap<Player, Deck> loadDecks(List<Player> players, Object map) {
+        if (!(map instanceof Map)) {
+            return ImmutableMap.of();
+        }
+        ImmutableMap.Builder<Player, Deck> builder = ImmutableMap.builder();
+
+        for (Map.Entry<String, Object> o : ((Map<String, Object>) map).entrySet()) {
+            builder.put(findPlayer(players, o.getKey()), Deck.load(o.getValue()));
+        }
+
+        return builder.build();
     }
 }
