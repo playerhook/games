@@ -1,12 +1,10 @@
 package org.playerhook.games.stupid.hooks.springboot
 
-import groovy.json.JsonOutput
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.playerhook.games.api.LocalSession
 import org.playerhook.games.api.Player
 import org.playerhook.games.api.Position
-import org.playerhook.games.api.SessionUpdate
 import org.playerhook.games.api.SessionUpdateType
 import org.playerhook.games.api.Token
 import org.playerhook.games.api.TokenPlacement
@@ -20,19 +18,25 @@ import spock.lang.Specification
 
 import java.security.SecureRandom
 
+import static groovy.json.JsonOutput.toJson
+import static org.playerhook.games.api.SessionUpdate.of
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
+/**
+ * Test for random controller
+ */
 @WebMvcTest(RandomController)
 @RunWith(SpringRunner)
-public class RandomControllerTest extends Specification {
+class RandomControllerSpec extends Specification {
 
     @Autowired MockMvc mvc
 
     @Test void "test hook"() {
         SecureRandom random = new SecureRandom()
-        LocalSession session = TicTacToeRules.matchThree(null, new URL("http://private-f8637-playerhook.apiary-mock.com/games/session/xyz"))
+        LocalSession session = TicTacToeRules.matchThree(null,
+                new URL('http://private-f8637-playerhook.apiary-mock.com/games/session/xyz'))
 
         Player dartagnan = Player.create('dartagnan')
         Player athos = Player.create('athos')
@@ -51,9 +55,17 @@ public class RandomControllerTest extends Specification {
         }
 
         when:
-            String jsonSession = JsonOutput.toJson(SessionUpdate.of(session, SessionUpdateType.Default.MOVE).toMap(false));
-            this.mvc.perform(post("/tictactoe/random?u=${session.playerOnTurn.get().username}").content(jsonSession).accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isAccepted()).andExpect(content().json('{"acknowledged": true}'))
+            String jsonSession = toJson(of(session, SessionUpdateType.Default.MOVE).toMap(false))
+
+            this.mvc.perform(
+                    post("/tictactoe/random?u=${session.playerOnTurn.get().username}")
+                    .content(jsonSession)
+                    .accept(MediaType.APPLICATION_JSON)
+            ).andExpect(
+                    status().isAccepted()
+            ).andExpect(
+                    content().json('{"acknowledged": true}')
+            )
         then:
             noExceptionThrown()
     }
