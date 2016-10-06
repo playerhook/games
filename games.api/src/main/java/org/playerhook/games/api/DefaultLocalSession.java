@@ -130,6 +130,9 @@ final class DefaultLocalSession implements LocalSession {
         subject.onNext(SessionUpdate.of(this, SessionUpdateType.Default.STATUS));
         if (status == Status.FINISHED) {
             subject.onCompleted();
+            if (url != null) {
+                ACTIVE_SESSIONS.remove(url);
+            }
         }
     }
 
@@ -141,6 +144,9 @@ final class DefaultLocalSession implements LocalSession {
 
     @Override
     public void join(Player newPlayer) {
+        if (!status.equals(Status.WAITING)) {
+            throw new IllegalStateException("The game has already started!");
+        }
         if (players.contains(newPlayer)) {
             throw new IllegalStateException("Already playing this game!");
         }
@@ -154,6 +160,9 @@ final class DefaultLocalSession implements LocalSession {
 
     @Override
     public void start() {
+        if (!status.equals(Status.WAITING)) {
+            throw new IllegalStateException("The game has already started!");
+        }
         if (canStart()) {
             this.activePlayer = Iterables.getFirst(getPlayers(), null);
             changeState(Status.IN_PROGRESS);
@@ -202,6 +211,9 @@ final class DefaultLocalSession implements LocalSession {
     @Override
     public void play(TokenPlacement placement) {
         turnLock.lock();
+        if (status.equals(Status.FINISHED)) {
+            throw new IllegalStateException("The game has already finished!");
+        }
         if (doGenericChecks(placement)) {
             turnLock.unlock();
             return;
@@ -281,7 +293,7 @@ final class DefaultLocalSession implements LocalSession {
             }
         }
 
-        return new DefaultLocalSession(
+        DefaultLocalSession newSession = new DefaultLocalSession(
                 version,
                 game,
                 board,
@@ -293,6 +305,12 @@ final class DefaultLocalSession implements LocalSession {
                 status,
                 activePlayer
         );
+
+        if (!newSession.getStatus().equals(Status.FINISHED) && newSession.getURL().isPresent()) {
+            ACTIVE_SESSIONS.put(newSession.getURL().get(), newSession);
+        }
+
+        return newSession;
     }
 
     private void update(Integer version, Game game, Board board, ImmutableMap<Player, Deck> decks, ImmutableMap<Player, Integer> scores, List<Player> players, List<Move> moves, Status status, Player activePlayer) {
