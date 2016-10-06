@@ -4,15 +4,40 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.MapMaker;
 import org.playerhook.games.util.MapSerializable;
 import rx.subjects.PublishSubject;
 
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 final class DefaultLocalSession implements LocalSession {
+
+    private static final ConcurrentMap<URL, DefaultLocalSession> ACTIVE_SESSIONS = new MapMaker()
+            .weakValues()
+            .makeMap();
+
+    static DefaultLocalSession get(Game game, URL url) {
+        if (url != null) {
+            DefaultLocalSession existing = ACTIVE_SESSIONS.get(url);
+            if (existing != null) {
+                throw new IllegalArgumentException("Session with url " + url + " already exists!");
+            }
+        }
+
+        DefaultLocalSession session = new DefaultLocalSession(game, url);
+        if (url != null) {
+            ACTIVE_SESSIONS.put(url, session);
+        }
+        return session;
+    }
+
+    static DefaultLocalSession find(URL url) {
+        return ACTIVE_SESSIONS.get(url);
+    }
 
     private final Map<Player, Deck> decks = new HashMap<>();
     private final Map<Player, Integer> scores = new HashMap<>();
@@ -28,6 +53,36 @@ final class DefaultLocalSession implements LocalSession {
     private Board board;
     private Status status = Status.WAITING;
     private Player activePlayer;
+
+    private DefaultLocalSession(Game game, URL url) {
+        this.game = Preconditions.checkNotNull(game, "Game cannot be null");
+        this.board = game.getRules().prepareBoard();
+        this.url = url;
+    }
+
+    /**
+     * Deserialization constructor.
+     */
+    private DefaultLocalSession(Game game,
+                        Board board,
+                        URL url,
+                        Map<Player, Deck> decks,
+                        Map<Player, Integer> scores,
+                        List<Player> players,
+                        List<Move> moves,
+                        Status status,
+                        Player activePlayer) {
+        this.game = game;
+        this.board = board;
+        this.url = url;
+        this.status = status;
+        this.activePlayer = activePlayer;
+
+        this.decks.putAll(decks);
+        this.scores.putAll(scores);
+        this.players.addAll(players);
+        this.moves.addAll(moves);
+    }
 
     public Game getGame() {
         return game;
@@ -122,36 +177,6 @@ final class DefaultLocalSession implements LocalSession {
         return false;
     }
 
-    DefaultLocalSession(Game game, URL url) {
-        this.game = Preconditions.checkNotNull(game, "Game cannot be null");
-        this.board = game.getRules().prepareBoard();
-        this.url = url;
-    }
-
-    /**
-     * Deserialization constructor.
-     */
-    DefaultLocalSession(Game game,
-                        Board board,
-                        URL url,
-                        Map<Player, Deck> decks,
-                        Map<Player, Integer> scores,
-                        List<Player> players,
-                        List<Move> moves,
-                        Status status,
-                        Player activePlayer) {
-        this.game = game;
-        this.board = board;
-        this.url = url;
-        this.status = status;
-        this.activePlayer = activePlayer;
-
-        this.decks.putAll(decks);
-        this.scores.putAll(scores);
-        this.players.addAll(players);
-        this.moves.addAll(moves);
-    }
-
     @Override
     public Deck getDeck(Player player) {
         Deck deck = decks.getOrDefault(player, getGame().getRules().prepareDeck(this, player));
@@ -218,6 +243,7 @@ final class DefaultLocalSession implements LocalSession {
         Map<String, Object> payload = (Map<String, Object>) session;
 
         URL url = MapSerializable.loadURL(payload, "url");
+
         Game game = Game.load(payload.getOrDefault("game", null));
         Board board = Board.load(payload.getOrDefault("board", null));
         Player activePlayer = Player.load(payload.getOrDefault("playerOnTurn", null));
@@ -226,6 +252,21 @@ final class DefaultLocalSession implements LocalSession {
         Status status = Status.valueOf(payload.getOrDefault("status", Status.WAITING).toString());
         ImmutableMap<Player, Integer> scores = loadScores(players, payload.getOrDefault("scores", Collections.emptyList()));
         ImmutableMap<Player, Deck> decks = loadDecks(players, payload.getOrDefault("decks", Collections.emptyList()));
+
+        if (url != null) {
+            DefaultLocalSession existing = ACTIVE_SESSIONS.get(url);
+            if (existing != null) {
+                existing.update(game,
+                        board,
+                        decks,
+                        scores,
+                        players,
+                        moves,
+                        status,
+                        activePlayer);
+                return existing;
+            }
+        }
 
         return new DefaultLocalSession(
                 game,
@@ -238,6 +279,44 @@ final class DefaultLocalSession implements LocalSession {
                 status,
                 activePlayer
         );
+    }
+
+    private void update(Game game, Board board, ImmutableMap<Player, Deck> decks, ImmutableMap<Player, Integer> scores, List<Player> players, List<Move> moves, Status status, Player activePlayer) {
+        if (!this.game.equals(game)) {
+            throw new IllegalArgumentException("Trying to load existing session with different game. Original: " + getGame() + ", new: " + game);
+        }
+
+        if (!this.board.equals(board)) {
+            this.board = board;
+        }
+
+        if (!this.decks.equals(decks)) {
+            this.decks.clear();
+            this.decks.putAll(decks);
+        }
+
+        if (!this.scores.equals(scores)) {
+            this.scores.clear();
+            this.scores.putAll(scores);
+        }
+
+        if (!this.players.equals(players)) {
+            this.players.clear();
+            this.players.addAll(players);
+        }
+
+        if (!this.moves.equals(moves)) {
+            this.moves.clear();
+            this.moves.addAll(moves);
+        }
+
+        if (this.status != null && !this.status.equals(status)) {
+            this.status = status;
+        }
+
+        if (this.activePlayer != null && !this.activePlayer.equals(activePlayer)) {
+            this.activePlayer = activePlayer;
+        }
     }
 
     private static Player findPlayer(List<Player> players, String username) {

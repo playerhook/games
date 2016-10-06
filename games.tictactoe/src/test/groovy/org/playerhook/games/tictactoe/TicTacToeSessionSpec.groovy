@@ -50,7 +50,7 @@ class TicTacToeSessionSpec extends Specification {
         when:
             LocalSession session = TicTacToeRules.matchThree(
                     new URL('http://www.example.com/ttt'),
-                    new URL('http://www.example.com/ttt/123')
+                    new URL('http://www.example.com/ttt/345')
             )
 
             session.asObservable().subscribe {
