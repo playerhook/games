@@ -11,8 +11,10 @@ import rx.subjects.PublishSubject;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 final class DefaultLocalSession implements LocalSession {
 
@@ -49,21 +51,26 @@ final class DefaultLocalSession implements LocalSession {
     private final List<Move> moves = new ArrayList<>();
 
     private final Lock turnLock = new ReentrantLock();
+    private final AtomicInteger version;
 
     private Board board;
     private Status status = Status.WAITING;
     private Player activePlayer;
 
+
     private DefaultLocalSession(Game game, URL url) {
         this.game = Preconditions.checkNotNull(game, "Game cannot be null");
         this.board = game.getRules().prepareBoard();
         this.url = url;
+        this.version = new AtomicInteger(1);
     }
 
     /**
      * Deserialization constructor.
      */
-    private DefaultLocalSession(Game game,
+    private DefaultLocalSession(
+                        Integer version,
+                        Game game,
                         Board board,
                         URL url,
                         Map<Player, Deck> decks,
@@ -82,6 +89,7 @@ final class DefaultLocalSession implements LocalSession {
         this.scores.putAll(scores);
         this.players.addAll(players);
         this.moves.addAll(moves);
+        this.version = new AtomicInteger(version);
     }
 
     public Game getGame() {
@@ -118,6 +126,7 @@ final class DefaultLocalSession implements LocalSession {
 
     private void changeState(Status status) {
         this.status = status;
+        version.incrementAndGet();
         subject.onNext(SessionUpdate.of(this, SessionUpdateType.Default.STATUS));
         if (status == Status.FINISHED) {
             subject.onCompleted();
@@ -126,6 +135,7 @@ final class DefaultLocalSession implements LocalSession {
 
     private void move(Move move) {
         moves.add(move);
+        version.incrementAndGet();
         subject.onNext(SessionUpdate.of(this, SessionUpdateType.Default.MOVE));
     }
 
@@ -244,6 +254,7 @@ final class DefaultLocalSession implements LocalSession {
 
         URL url = MapSerializable.loadURL(payload, "url");
 
+        Integer version = MapSerializable.loadInteger(payload, "version");
         Game game = Game.load(payload.getOrDefault("game", null));
         Board board = Board.load(payload.getOrDefault("board", null));
         Player activePlayer = Player.load(payload.getOrDefault("playerOnTurn", null));
@@ -256,7 +267,9 @@ final class DefaultLocalSession implements LocalSession {
         if (url != null) {
             DefaultLocalSession existing = ACTIVE_SESSIONS.get(url);
             if (existing != null) {
-                existing.update(game,
+                existing.update(
+                        version,
+                        game,
                         board,
                         decks,
                         scores,
@@ -269,6 +282,7 @@ final class DefaultLocalSession implements LocalSession {
         }
 
         return new DefaultLocalSession(
+                version,
                 game,
                 board,
                 url,
@@ -281,7 +295,11 @@ final class DefaultLocalSession implements LocalSession {
         );
     }
 
-    private void update(Game game, Board board, ImmutableMap<Player, Deck> decks, ImmutableMap<Player, Integer> scores, List<Player> players, List<Move> moves, Status status, Player activePlayer) {
+    private void update(Integer version, Game game, Board board, ImmutableMap<Player, Deck> decks, ImmutableMap<Player, Integer> scores, List<Player> players, List<Move> moves, Status status, Player activePlayer) {
+        if (version != null && version <= this.version.get()) {
+            return;
+        }
+
         if (!this.game.equals(game)) {
             throw new IllegalArgumentException("Trying to load existing session with different game. Original: " + getGame() + ", new: " + game);
         }
@@ -317,6 +335,27 @@ final class DefaultLocalSession implements LocalSession {
         if (this.activePlayer != null && !this.activePlayer.equals(activePlayer)) {
             this.activePlayer = activePlayer;
         }
+    }
+
+    @Override public Map<String, Object> toMap(boolean includeInternalState) {
+        ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
+
+        if (includeInternalState) {
+            builder.put("version", version.get());
+        }
+
+        builder.put("game", getGame().toMap(includeInternalState));
+        builder.put("board", getBoard().toMap(includeInternalState));
+        builder.put("players", getPlayers().stream().map((player2) -> player2.toMap(includeInternalState)).collect(Collectors.toList()));
+        builder.put("scores", ImmutableMap.copyOf(getPlayers().stream().collect(Collectors.toMap(Player::getUsername, this::getScore))));
+        builder.put("decks", ImmutableMap.copyOf(getPlayers().stream().collect(Collectors.toMap(Player::getUsername, (player1) -> getDeck(player1).toMap(includeInternalState)))));
+        builder.put("playedMoves", getPlayedMoves().stream().map((move) -> move.toMap(includeInternalState)).collect(Collectors.toList()));
+        builder.put("status", getStatus().name());
+
+        getPlayerOnTurn().ifPresent(player -> builder.put("playerOnTurn", player.toMap(includeInternalState)));
+        getURL().ifPresent(s -> builder.put("url", s.toExternalForm()));
+
+        return builder.build();
     }
 
     private static Player findPlayer(List<Player> players, String username) {
