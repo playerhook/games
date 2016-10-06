@@ -175,7 +175,6 @@ final class DefaultLocalSession implements LocalSession {
         }
 
         this.board = getBoard().place(placement);
-        move(move);
 
         for(Map.Entry<Player, Integer> scoreEntry : result.getScoreUpdates().entrySet()) {
             Integer nextScore = scores.getOrDefault(scoreEntry.getKey(), 0);
@@ -183,13 +182,15 @@ final class DefaultLocalSession implements LocalSession {
             scores.put(scoreEntry.getKey(), nextScore);
         }
 
+        if (!result.getNextPlayer().equals(activePlayer)) {
+            this.activePlayer = result.getNextPlayer();
+        }
+
         if (!result.getNextStatus().map(status -> status.equals(getStatus())).orElse(false)) {
             result.getNextStatus().ifPresent(this::changeState);
         }
 
-        if (!result.getNextPlayer().equals(activePlayer)) {
-            this.activePlayer = result.getNextPlayer();
-        }
+        move(move);
     }
 
     @Override

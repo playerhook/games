@@ -25,3 +25,7 @@ dependencies {
 
 
 jar.finalizedBy(bootRepackage)
+
+bootRun {
+    systemProperties "spring.profiles.active": "development"
+}

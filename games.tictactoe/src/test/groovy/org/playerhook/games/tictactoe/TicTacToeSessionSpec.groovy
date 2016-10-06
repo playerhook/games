@@ -9,6 +9,7 @@ import org.playerhook.games.api.Session
 import org.playerhook.games.api.SessionUpdate
 import org.playerhook.games.api.Token
 import org.playerhook.games.api.TokenPlacement
+import org.playerhook.games.util.SessionPrinter
 import spock.lang.Specification
 
 import java.security.SecureRandom
@@ -85,53 +86,8 @@ class TicTacToeSessionSpec extends Specification {
         }
     }
 
-    @SuppressWarnings(['Println', 'AbcMetric', 'NestedForLoop'])
     private static void printSession(SessionUpdate sessionUpdate) {
-        Session session = sessionUpdate.session
-
-        println '=' * 60
-        println session.game.title.center(60)
-
-        if (session.playedMoves && session.playedMoves.last().ruleViolation.isPresent()) {
-            println '-' * 60
-            println session.playedMoves.last().ruleViolation.get().message.center(60, '!')
-        }
-
-        println '=' * 60
-        session.players.each {
-            if (it == session.playerOnTurn.orElse(null)) {
-                print '* '
-            } else {
-                print '  '
-            }
-            print it.username.padRight(40)
-            print ': '
-            print String.valueOf(session.getScore(it)).padLeft(5, '0')
-            println()
-        }
-        println '=' * 60
-        println '-' * (session.board.width * 2 + 1)
-        for (int row = session.board.firstRow; row <= session.board.lastRow; row++) {
-            print '|'
-            for (int col = session.board.firstColumn; col <= session.board.lastColumn; col++) {
-                Optional<TokenPlacement> optional = session.board.getTokenPlacement(Position.at(row, col))
-                if (optional.isPresent()) {
-                    TokenPlacement tokenPlacement = optional.get()
-                    String symbol = tokenPlacement.token.symbol
-                    if (session.playedMoves && session.playedMoves.last().tokenPlacement == tokenPlacement) {
-                        symbol = symbol.toUpperCase()
-                    }
-                    print symbol
-                } else {
-                    print ' '
-                }
-                print '|'
-            }
-            println()
-            println '-' * (session.board.width * 2 + 1)
-        }
-        println '-' * 60
-        println "Updated: ${sessionUpdate.type}"
+        SessionPrinter.out().print(sessionUpdate)
     }
 
 }

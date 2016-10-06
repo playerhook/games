@@ -67,7 +67,7 @@ public class TicTacToeRules implements Rules {
 
     @Override
     public Board prepareBoard() {
-        return Board.square((int) Math.round(toWin * 2.5));
+        return Board.square((int) Math.round(toWin * 1.5));
     }
 
     @Override

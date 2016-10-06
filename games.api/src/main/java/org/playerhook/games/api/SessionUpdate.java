@@ -48,4 +48,9 @@ public final class SessionUpdate implements MapSerializable {
             SessionUpdateType.load(MapSerializable.loadString(map, "type"))
         );
     }
+
+    @Override
+    public String toString() {
+        return "Update: " + type + " for " + session;
+    }
 }

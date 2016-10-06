@@ -124,4 +124,9 @@ final class RemoteSession implements Session {
         onPlay.accept(url, placement);
     }
 
+    @Override
+    public String toString() {
+        return "Session: " + url + " of " + getGame();
+    }
+
 }
