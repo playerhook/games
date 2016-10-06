@@ -9,6 +9,8 @@ import rx.subjects.PublishSubject;
 
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 final class DefaultLocalSession implements LocalSession {
 
@@ -20,6 +22,8 @@ final class DefaultLocalSession implements LocalSession {
 
     private final List<Player> players = new ArrayList<>();
     private final List<Move> moves = new ArrayList<>();
+
+    private final Lock turnLock = new ReentrantLock();
 
     private Board board;
     private Status status = Status.WAITING;
@@ -162,7 +166,9 @@ final class DefaultLocalSession implements LocalSession {
 
     @Override
     public void play(TokenPlacement placement) {
+        turnLock.lock();
         if (doGenericChecks(placement)) {
+            turnLock.unlock();
             return;
         }
 
@@ -171,6 +177,7 @@ final class DefaultLocalSession implements LocalSession {
         Move move = result.getMove();
 
         if (move.getRuleViolation().isPresent()) {
+            turnLock.unlock();
             return;
         }
 
@@ -191,6 +198,7 @@ final class DefaultLocalSession implements LocalSession {
         }
 
         move(move);
+        turnLock.unlock();
     }
 
     @Override
