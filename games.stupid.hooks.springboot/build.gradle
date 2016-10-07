@@ -4,14 +4,19 @@ buildscript {
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:1.4.0.RELEASE")
+        classpath 'com.bmuschko:gradle-docker-plugin:3.0.3'
     }
 }
 
 apply plugin: 'spring-boot'
+apply plugin: 'application'
+apply plugin: 'com.bmuschko.docker-java-application'
 
 jar {
     baseName = 'games.stupid.hooks.springboot'
 }
+
+mainClassName = 'org.playerhook.games.stupid.hooks.springboot.StupidHooksConfiguration'
 
 dependencies {
     compile project(":games.api")
@@ -23,9 +28,38 @@ dependencies {
     testCompile 'org.spockframework:spock-spring:1.0-groovy-2.4'
 }
 
-
 jar.finalizedBy(bootRepackage)
 
 bootRun {
     systemProperties "spring.profiles.active": "development"
+}
+
+configurations {
+    dockerJava {
+        resolutionStrategy {
+            force 'de.gesellix:unix-socket-factory:2016-04-06T22-21-19'
+        }
+    }
+}
+
+docker {
+    url = 'unix:///var/run/docker.sock'
+
+    javaApplication {
+        baseImage = 'openjdk:8'
+        maintainer = 'Vladimir Orany "vladimir@orany.cz"'
+        ports = [9000]
+        tag = "playerhook/stupid.hooks:${project.version}"
+    }
+
+    registryCredentials {
+        url = 'https://index.docker.io/v1'
+        username = getPropertyOrUseDefault('hub.username', 'musketyr')
+        password = getPropertyOrUseDefault('hub.password', 'password')
+        email = getPropertyOrUseDefault('hub.email', 'vladimir@orany.cz')
+    }
+}
+
+String getPropertyOrUseDefault(String propertyName, String defaultValue) {
+    hasProperty(propertyName) ? getProperty(propertyName) : defaultValue
 }
