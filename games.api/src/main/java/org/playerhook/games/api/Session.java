@@ -18,7 +18,6 @@ public interface Session extends MapSerializable {
     ImmutableList<Move> getPlayedMoves();
     Status getStatus();
     Optional<URL> getURL();
-    Optional<String> getKey();
 
     /**
      * @param player the player which deck should be returned
@@ -45,9 +44,6 @@ public interface Session extends MapSerializable {
         builder.put("status", getStatus().name());
 
         getPlayerOnTurn().ifPresent(player -> builder.put("playerOnTurn", player.toMap(level)));
-        if (getKey().isPresent() && (PrivacyLevel.INTERNAL.equals(level) || PrivacyLevel.PROTECTED.equals(level))) {
-            getKey().ifPresent(key -> builder.put("key", key));
-        }
         getURL().ifPresent(s -> builder.put("url", s.toExternalForm()));
 
         return builder.build();

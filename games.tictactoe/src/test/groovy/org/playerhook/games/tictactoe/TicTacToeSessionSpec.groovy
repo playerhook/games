@@ -5,7 +5,6 @@ import groovy.json.JsonSlurper
 import org.playerhook.games.api.LocalSession
 import org.playerhook.games.api.Player
 import org.playerhook.games.api.Position
-import org.playerhook.games.api.Session
 import org.playerhook.games.api.SessionUpdate
 import org.playerhook.games.api.Token
 import org.playerhook.games.api.TokenPlacement
@@ -38,6 +37,7 @@ class TicTacToeSessionSpec extends Specification {
 
             session.join(dartagnan)
             session.join(athos)
+            session.signWith('pa$$word')
 
             session.start()
 
@@ -76,14 +76,14 @@ class TicTacToeSessionSpec extends Specification {
             noExceptionThrown()
     }
 
-    protected static void finish(Session session) {
+    protected static void finish(LocalSession session) {
         SecureRandom random = new SecureRandom()
         while (!session.finished) {
             Player onTurn = session.playerOnTurn.get()
             int nextRow = session.board.firstRow + random.nextInt(session.board.height)
             int nextCol = session.board.firstColumn + random.nextInt(session.board.width)
             Token token = session.getDeck(onTurn).playableTokens.first()
-            session.play(TokenPlacement.create(token, onTurn, Position.at(nextRow, nextCol)))
+            session.play(session.sign(TokenPlacement.create(token, onTurn, Position.at(nextRow, nextCol))))
         }
     }
 

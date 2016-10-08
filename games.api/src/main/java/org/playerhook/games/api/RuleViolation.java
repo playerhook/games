@@ -11,7 +11,8 @@ public interface RuleViolation {
         TOKEN_NOT_ALLOWED_ON_GIVEN_POSITION("You cannot place your token at given position!"),
         ILLEGAL_TOKEN("You cannot play with this token!"),
         GAME_NOT_STARTED_YET("Game has't started yet!"),
-        KEY_MISMATCH("Session key does not match");
+        KEY_MISMATCH("Session key does not match"),
+        KEY_MISSING("Session is signed but no player key is present");
 
         private final String message;
 

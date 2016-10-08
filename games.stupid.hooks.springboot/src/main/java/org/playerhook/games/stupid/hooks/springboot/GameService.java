@@ -78,6 +78,6 @@ public class GameService {
 
         int nextRow = session.getBoard().getFirstRow() + random.nextInt(session.getBoard().getHeight());
         int nextCol = session.getBoard().getFirstColumn() + random.nextInt(session.getBoard().getHeight());
-        session.play(TokenPlacement.create(token, player, Position.at(nextRow, nextCol), session.getKey().orElse(null)));
+        session.play(TokenPlacement.create(token, player, Position.at(nextRow, nextCol)));
     }
 }

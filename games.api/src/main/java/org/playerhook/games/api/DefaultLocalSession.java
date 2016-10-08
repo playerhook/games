@@ -8,6 +8,9 @@ import com.google.common.collect.MapMaker;
 import org.playerhook.games.util.MapSerializable;
 import rx.subjects.PublishSubject;
 
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentMap;
@@ -96,8 +99,8 @@ final class DefaultLocalSession implements LocalSession {
     }
 
     @Override
-    public void sign(String key) {
-        this.key = key;
+    public void signWith(String privateKey) {
+        this.key = privateKey;
     }
 
     public Game getGame() {
@@ -106,11 +109,6 @@ final class DefaultLocalSession implements LocalSession {
 
     public Optional<URL> getURL() {
         return Optional.ofNullable(url);
-    }
-
-    @Override
-    public Optional<String> getKey() {
-        return Optional.ofNullable(key);
     }
 
     public Board getBoard() {
@@ -190,8 +188,12 @@ final class DefaultLocalSession implements LocalSession {
             return true;
         }
 
-        if (getKey().isPresent()) {
-            if (!key.equals(placement.getKey().orElse(null))) {
+        if (key != null) {
+            if (!placement.getKey().isPresent()) {
+                move(Move.to(placement, RuleViolation.Default.KEY_MISSING));
+                return true;
+            }
+            if (!placement.getKey().get().equals(generateUserKey(placement.getPlayer().getUsername(), key))) {
                 move(Move.to(placement, RuleViolation.Default.KEY_MISMATCH));
                 return true;
             }
@@ -384,7 +386,7 @@ final class DefaultLocalSession implements LocalSession {
             builder.put("version", version.get());
         }
 
-        if (key != null && (PrivacyLevel.INTERNAL.equals(level) || PrivacyLevel.PROTECTED.equals(level))) {
+        if (key != null && PrivacyLevel.INTERNAL.equals(level)) {
             builder.put("key", key);
         }
 
@@ -433,5 +435,27 @@ final class DefaultLocalSession implements LocalSession {
         }
 
         return builder.build();
+    }
+
+    private static final int ITERATIONS = 20*1000;
+    private static final int DESIRED_KEY_LEN = 64;
+
+    @Override
+    public Optional<String> getKey(Player player) {
+        if (key == null) {
+            return Optional.empty();
+        }
+        return Optional.of(generateUserKey(player.getUsername(), key));
+    }
+
+    private static String generateUserKey(String username, String privateKey) {
+        SecretKeyFactory f = null;
+        try {
+            f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+            SecretKey key = f.generateSecret(new PBEKeySpec(username.toCharArray(), privateKey.getBytes(), ITERATIONS, DESIRED_KEY_LEN));
+            return new String(key.getEncoded());
+        } catch (Exception e) {
+            throw new IllegalStateException("Problems generating player key", e);
+        }
     }
 }

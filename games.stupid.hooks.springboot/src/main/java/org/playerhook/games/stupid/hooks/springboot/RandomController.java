@@ -1,5 +1,6 @@
 package org.playerhook.games.stupid.hooks.springboot;
 
+import com.google.common.base.Strings;
 import org.playerhook.games.api.*;
 import org.playerhook.games.util.Acknowledgement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +23,18 @@ public class RandomController {
     @RequestMapping(method=RequestMethod.POST)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public @ResponseBody
-    Acknowledgement playIfOnTurn(@RequestBody String body, @RequestParam("u") String username) {
-        SessionUpdate update = SessionUpdate.materialize(new JacksonJsonParser().parseMap(body), gameService::sendPlacement);
+    Acknowledgement playIfOnTurn(@RequestBody String body,
+                                 @RequestParam("u") String username,
+                                 @RequestHeader(name = "X-PlayerHook-Player-Key", required = false) String key) {
+        SessionUpdate update = SessionUpdate.materialize(
+                new JacksonJsonParser().parseMap(body),
+                (url, placement) -> {
+                    if (!Strings.isNullOrEmpty(key)) {
+                        placement = placement.sign(key);
+                    }
+                    gameService.sendPlacement(url, placement);
+                }
+        );
         gameService.playIfOnTurn(update, username);
         return Acknowledgement.ACKNOWLEDGED;
     }

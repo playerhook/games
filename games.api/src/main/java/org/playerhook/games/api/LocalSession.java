@@ -3,6 +3,7 @@ package org.playerhook.games.api;
 import rx.Observable;
 
 import java.net.URL;
+import java.util.Optional;
 
 public interface LocalSession extends Session {
 
@@ -20,7 +21,19 @@ public interface LocalSession extends Session {
     }
 
     void join(Player newPlayer);
-    void sign(String key);
+
+    void signWith(String privateKey);
+
+    Optional<String> getKey(Player player);
+
+    default TokenPlacement sign(TokenPlacement placement) {
+        Optional<String> key = getKey(placement.getPlayer());
+        if (key.isPresent()) {
+            return placement.sign(key.get());
+        }
+        return placement;
+    }
+
     void start();
     Observable<SessionUpdate> asObservable();
 
