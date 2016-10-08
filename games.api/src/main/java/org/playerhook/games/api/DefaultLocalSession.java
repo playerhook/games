@@ -263,6 +263,10 @@ final class DefaultLocalSession implements LocalSession {
             this.activePlayer = result.getNextPlayer();
         }
 
+        if (!placement.getSource().isPresent()) {
+            decks.put(placement.getPlayer(), decks.get(placement.getPlayer()).remove(placement.getToken()));
+        }
+
         if (!result.getNextStatus().map(status -> status.equals(getStatus())).orElse(false)) {
             result.getNextStatus().ifPresent(this::changeState);
         }

@@ -6,6 +6,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.playerhook.games.util.MapSerializable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -83,5 +85,17 @@ public final class Deck implements MapSerializable {
             MapSerializable.loadList(map.getOrDefault("tokens", ImmutableList.of()), o -> new Token.Stub(o.toString())),
             MapSerializable.loadInteger(map, "totalTokensAvailable")
         );
+    }
+
+    public Deck remove(Token token) {
+        int index = tokens.indexOf(token);
+
+        if (index == -1) {
+            return this;
+        }
+
+        List<Token> copy = new ArrayList<Token>(tokens);
+        copy.remove(index);
+        return of(copy, totalTokensAvailable);
     }
 }
