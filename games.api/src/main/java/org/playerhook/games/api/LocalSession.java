@@ -20,6 +20,7 @@ public interface LocalSession extends Session {
     }
 
     void join(Player newPlayer);
+    void sign(String key);
     void start();
     Observable<SessionUpdate> asObservable();
 

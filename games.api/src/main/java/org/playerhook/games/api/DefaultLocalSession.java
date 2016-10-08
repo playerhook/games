@@ -56,7 +56,7 @@ final class DefaultLocalSession implements LocalSession {
     private Board board;
     private Status status = Status.WAITING;
     private Player activePlayer;
-
+    private String key;
 
     private DefaultLocalSession(Game game, URL url) {
         this.game = Preconditions.checkNotNull(game, "Game cannot be null");
@@ -69,16 +69,18 @@ final class DefaultLocalSession implements LocalSession {
      * Deserialization constructor.
      */
     private DefaultLocalSession(
-                        Integer version,
-                        Game game,
-                        Board board,
-                        URL url,
-                        Map<Player, Deck> decks,
-                        Map<Player, Integer> scores,
-                        List<Player> players,
-                        List<Move> moves,
-                        Status status,
-                        Player activePlayer) {
+            Integer version,
+            Game game,
+            Board board,
+            URL url,
+            Map<Player, Deck> decks,
+            Map<Player, Integer> scores,
+            List<Player> players,
+            List<Move> moves,
+            Status status,
+            Player activePlayer,
+            String key
+    ) {
         this.game = game;
         this.board = board;
         this.url = url;
@@ -90,6 +92,12 @@ final class DefaultLocalSession implements LocalSession {
         this.players.addAll(players);
         this.moves.addAll(moves);
         this.version = new AtomicInteger(version);
+        this.key = key;
+    }
+
+    @Override
+    public void sign(String key) {
+        this.key = key;
     }
 
     public Game getGame() {
@@ -98,6 +106,11 @@ final class DefaultLocalSession implements LocalSession {
 
     public Optional<URL> getURL() {
         return Optional.ofNullable(url);
+    }
+
+    @Override
+    public Optional<String> getKey() {
+        return Optional.ofNullable(key);
     }
 
     public Board getBoard() {
@@ -171,10 +184,17 @@ final class DefaultLocalSession implements LocalSession {
         throw new IllegalStateException("Not enough players!");
     }
 
-    private boolean doGenericChecks(TokenPlacement placement) {
+    private boolean genericChecksFails(TokenPlacement placement) {
         if (Status.WAITING.equals(getStatus())) {
             move(Move.to(placement, RuleViolation.Default.GAME_NOT_STARTED_YET));
             return true;
+        }
+
+        if (getKey().isPresent()) {
+            if (!key.equals(placement.getKey().orElse(null))) {
+                move(Move.to(placement, RuleViolation.Default.KEY_MISMATCH));
+                return true;
+            }
         }
 
         Optional<Player> playerOnTurn = getPlayerOnTurn();
@@ -214,7 +234,7 @@ final class DefaultLocalSession implements LocalSession {
         if (status.equals(Status.FINISHED)) {
             throw new IllegalStateException("The game has already finished!");
         }
-        if (doGenericChecks(placement)) {
+        if (genericChecksFails(placement)) {
             turnLock.unlock();
             return;
         }
@@ -275,6 +295,7 @@ final class DefaultLocalSession implements LocalSession {
         Status status = Status.valueOf(payload.getOrDefault("status", Status.WAITING).toString());
         ImmutableMap<Player, Integer> scores = loadScores(players, payload.getOrDefault("scores", Collections.emptyList()));
         ImmutableMap<Player, Deck> decks = loadDecks(players, payload.getOrDefault("decks", Collections.emptyList()));
+        String key = MapSerializable.loadString(payload, "key");
 
         if (url != null) {
             DefaultLocalSession existing = ACTIVE_SESSIONS.get(url);
@@ -303,7 +324,8 @@ final class DefaultLocalSession implements LocalSession {
                 players,
                 moves,
                 status,
-                activePlayer
+                activePlayer,
+                key
         );
 
         if (!newSession.getStatus().equals(Status.FINISHED) && newSession.getURL().isPresent()) {
@@ -360,6 +382,10 @@ final class DefaultLocalSession implements LocalSession {
 
         if (PrivacyLevel.INTERNAL.equals(level)) {
             builder.put("version", version.get());
+        }
+
+        if (key != null && (PrivacyLevel.INTERNAL.equals(level) || PrivacyLevel.PROTECTED.equals(level))) {
+            builder.put("key", key);
         }
 
         builder.put("game", getGame().toMap(level));

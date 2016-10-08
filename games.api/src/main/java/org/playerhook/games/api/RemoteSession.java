@@ -20,6 +20,7 @@ final class RemoteSession implements Session {
     private final ImmutableList<Move> moves;
     private final ImmutableMap<Player, Deck> decks;
     private final ImmutableMap<Player, Integer> scores;
+    private final String key;
     private final BiConsumer<URL, TokenPlacement> onPlay;
 
     RemoteSession(Object session, BiConsumer<URL, TokenPlacement> onPlay) {
@@ -44,6 +45,7 @@ final class RemoteSession implements Session {
         this.onPlay = onPlay;
         this.scores = loadScores(payload.getOrDefault("scores", Collections.emptyList()));
         this.decks = loadDecks(payload.getOrDefault("decks", Collections.emptyList()));
+        this.key = loadString(payload, "key");
     }
 
     private Player findPlayer(String username) {
@@ -117,6 +119,11 @@ final class RemoteSession implements Session {
     @Override
     public int getScore(Player player) {
         return scores.getOrDefault(player, 0);
+    }
+
+    @Override
+    public Optional<String> getKey() {
+        return Optional.ofNullable(key);
     }
 
     @Override

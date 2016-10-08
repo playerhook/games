@@ -13,16 +13,37 @@ public final class TokenPlacement implements MapSerializable {
     private final Player player;
     private final Position source;
     private final Position destination;
+    private final String key;
+
 
     public static TokenPlacement create(Token token, Player player, Position destination) {
-        return new TokenPlacement(token, player, null, destination);
+        return new TokenPlacement(token, player, null, destination, null);
     }
 
-    private TokenPlacement(Token token, Player player, Position source, Position destination) {
+    public static TokenPlacement create(Token token, Player player, Position destination, String key) {
+        return new TokenPlacement(token, player, null, destination, key);
+    }
+
+    public TokenPlacement sign(String key){
+        if (key.equals(this.key)) {
+            return this;
+        }
+        return new TokenPlacement(token, player, source, destination, key);
+    }
+
+    public TokenPlacement unsigned(){
+        if (key == null) {
+            return this;
+        }
+        return new TokenPlacement(token, player, source, destination, null);
+    }
+
+    private TokenPlacement(Token token, Player player, Position source, Position destination, String key) {
         this.token = Preconditions.checkNotNull(token, "Token cannot be null");
         this.player = Preconditions.checkNotNull(player, "Player cannot be null");
         this.destination = Preconditions.checkNotNull(destination, "Destination cannot be null");
         this.source = source;
+        this.key = key;
     }
 
     public Token getToken() {
@@ -41,6 +62,10 @@ public final class TokenPlacement implements MapSerializable {
         return Optional.ofNullable(source);
     }
 
+    public Optional<String> getKey() {
+        return Optional.ofNullable(key);
+    }
+
     public String toString() {
         if (source == null) {
             return getPlayer().toString() + " placed " + getToken() + " on " + getDestination();
@@ -55,6 +80,7 @@ public final class TokenPlacement implements MapSerializable {
         builder.put("token", token.getSymbol());
         builder.put("player", player.toMap(level));
         getSource().ifPresent(source ->  builder.put("source", source.toMap(level)));
+        getKey().ifPresent(key ->  builder.put("key", key));
         builder.put("destination", destination.toMap(level));
 
         return builder.build();
@@ -73,7 +99,8 @@ public final class TokenPlacement implements MapSerializable {
             new Token.Stub(MapSerializable.loadString(map, "token")),
             Player.load(map.get("player")),
             Position.load(map.get("source")),
-            Position.load(map.get("destination"))
+            Position.load(map.get("destination")),
+            MapSerializable.loadString(map, "key")
         );
     }
 }
