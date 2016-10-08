@@ -20,6 +20,7 @@ import java.security.SecureRandom
 
 import static groovy.json.JsonOutput.toJson
 import static org.playerhook.games.api.SessionUpdate.of
+import static org.playerhook.games.util.MapSerializable.PrivacyLevel.PROTECTED
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -55,7 +56,7 @@ class RandomControllerSpec extends Specification {
         }
 
         when:
-            String jsonSession = toJson(of(session, SessionUpdateType.Default.MOVE).toMap(false))
+            String jsonSession = toJson(of(session, SessionUpdateType.Default.MOVE).toMap(PROTECTED))
 
             this.mvc.perform(
                     post("/random?u=${session.playerOnTurn.get().username}")

@@ -77,10 +77,10 @@ public final class Move implements MapSerializable {
     }
 
     @Override
-    public Map<String, Object> toMap(boolean includeInternalState) {
+    public Map<String, Object> toMap(PrivacyLevel level) {
         ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
 
-        builder.put("tokenPlacement", tokenPlacement.toMap(includeInternalState));
+        builder.put("tokenPlacement", tokenPlacement.toMap(level));
         builder.put("timestamp", timestamp.toEpochMilli());
 
         getRuleViolation().ifPresent(ruleViolation -> builder.put("ruleViolation", ruleViolation.getCode()));

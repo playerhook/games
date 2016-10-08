@@ -355,22 +355,22 @@ final class DefaultLocalSession implements LocalSession {
         }
     }
 
-    @Override public Map<String, Object> toMap(boolean includeInternalState) {
+    @Override public Map<String, Object> toMap(PrivacyLevel level) {
         ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
 
-        if (includeInternalState) {
+        if (PrivacyLevel.INTERNAL.equals(level)) {
             builder.put("version", version.get());
         }
 
-        builder.put("game", getGame().toMap(includeInternalState));
-        builder.put("board", getBoard().toMap(includeInternalState));
-        builder.put("players", getPlayers().stream().map((player2) -> player2.toMap(includeInternalState)).collect(Collectors.toList()));
+        builder.put("game", getGame().toMap(level));
+        builder.put("board", getBoard().toMap(level));
+        builder.put("players", getPlayers().stream().map((player2) -> player2.toMap(level)).collect(Collectors.toList()));
         builder.put("scores", ImmutableMap.copyOf(getPlayers().stream().collect(Collectors.toMap(Player::getUsername, this::getScore))));
-        builder.put("decks", ImmutableMap.copyOf(getPlayers().stream().collect(Collectors.toMap(Player::getUsername, (player1) -> getDeck(player1).toMap(includeInternalState)))));
-        builder.put("playedMoves", getPlayedMoves().stream().map((move) -> move.toMap(includeInternalState)).collect(Collectors.toList()));
+        builder.put("decks", ImmutableMap.copyOf(getPlayers().stream().collect(Collectors.toMap(Player::getUsername, (player1) -> getDeck(player1).toMap(level)))));
+        builder.put("playedMoves", getPlayedMoves().stream().map((move) -> move.toMap(level)).collect(Collectors.toList()));
         builder.put("status", getStatus().name());
 
-        getPlayerOnTurn().ifPresent(player -> builder.put("playerOnTurn", player.toMap(includeInternalState)));
+        getPlayerOnTurn().ifPresent(player -> builder.put("playerOnTurn", player.toMap(level)));
         getURL().ifPresent(s -> builder.put("url", s.toExternalForm()));
 
         return builder.build();

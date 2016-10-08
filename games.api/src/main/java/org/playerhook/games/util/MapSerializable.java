@@ -11,6 +11,25 @@ import java.util.function.Function;
 
 public interface MapSerializable {
 
+    enum PrivacyLevel {
+        /**
+         * Contains all the information.
+         *
+         * Use this level for example to save items to the database.
+         */
+        INTERNAL,
+
+        /**
+         * Contains all information present for authenticated user such as player of the sesssion.
+         */
+        PROTECTED,
+
+        /**
+         * Use this level to return publicly available information about the serialized object.
+         */
+        PUBLIC
+    }
+
     static <T> ImmutableList<T> loadList(Object list, Function<Object, T> loader) {
         if (!(list instanceof Iterable)) {
             return ImmutableList.of();
@@ -45,6 +64,6 @@ public interface MapSerializable {
         }).orElse(null);
     }
 
-    Map<String, Object> toMap(boolean includeInternalState);
+    Map<String, Object> toMap(PrivacyLevel level);
 
 }

@@ -158,7 +158,7 @@ public interface Rules extends MapSerializable {
     }
 
     @Override
-    default Map<String, Object> toMap(boolean includeInternalState) {
+    default Map<String, Object> toMap(PrivacyLevel level) {
         ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
 
         builder.put("description", getDescription());

@@ -19,8 +19,26 @@ public interface SessionUpdateType {
     }
 
     enum Default implements SessionUpdateType {
+        /**
+         * New move was placed.
+         */
         MOVE,
+
+        /**
+         * Player has joined or leaved the game.
+         */
         PLAYER,
+
+        /**
+         * Session is ready to accept next moves.
+         */
+        READY,
+
+        /**
+         * Status of the game has changed.
+         *
+         * For example the game has started
+         */
         STATUS;
 
 

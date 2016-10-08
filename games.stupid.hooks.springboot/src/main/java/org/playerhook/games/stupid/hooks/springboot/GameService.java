@@ -3,6 +3,7 @@ package org.playerhook.games.stupid.hooks.springboot;
 import com.google.common.collect.ImmutableList;
 import org.playerhook.games.api.*;
 import org.playerhook.games.util.Acknowledgement;
+import org.playerhook.games.util.MapSerializable;
 import org.playerhook.games.util.SessionPrinter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +23,7 @@ public class GameService {
         if (log.isInfoEnabled()) {
             log.info("Notifying session " + url + " with " + placement);
         }
-        new RestTemplate().postForObject(url.toExternalForm(), placement.toMap(false), Acknowledgement.class);
+        new RestTemplate().postForObject(url.toExternalForm(), placement.toMap(MapSerializable.PrivacyLevel.PROTECTED), Acknowledgement.class);
     }
 
     public void playIfOnTurn(SessionUpdate update, String username) {

@@ -78,7 +78,7 @@ public final class Player implements MapSerializable {
     }
 
     @Override
-    public Map<String, Object> toMap(boolean includeInternalState) {
+    public Map<String, Object> toMap(PrivacyLevel level) {
         ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
 
         builder.put("username", username);

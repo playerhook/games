@@ -15,6 +15,7 @@ import spock.lang.Specification
 import java.security.SecureRandom
 
 import static org.playerhook.games.api.SessionUpdate.materialize
+import static org.playerhook.games.util.MapSerializable.PrivacyLevel.PROTECTED
 
 /**
  * Tic Tac Toe game specification.
@@ -54,10 +55,10 @@ class TicTacToeSessionSpec extends Specification {
             )
 
             session.asObservable().subscribe {
-                Object map = it.toMap(false)
+                Object map = it.toMap(PROTECTED)
                 String json = JsonOutput.prettyPrint(JsonOutput.toJson(map))
                 SessionUpdate update = materialize(new JsonSlurper().parseText(json)) { url, tokenPlacement -> }
-                String other = JsonOutput.prettyPrint(JsonOutput.toJson(update.toMap(false)))
+                String other = JsonOutput.prettyPrint(JsonOutput.toJson(update.toMap(PROTECTED)))
                 assert json == other
             }
 
