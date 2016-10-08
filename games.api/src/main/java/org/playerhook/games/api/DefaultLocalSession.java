@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.MapMaker;
+import com.google.common.io.BaseEncoding;
 import org.playerhook.games.util.MapSerializable;
 import rx.subjects.PublishSubject;
 
@@ -453,7 +454,7 @@ final class DefaultLocalSession implements LocalSession {
         try {
             f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
             SecretKey key = f.generateSecret(new PBEKeySpec(username.toCharArray(), privateKey.getBytes(), ITERATIONS, DESIRED_KEY_LEN));
-            return new String(key.getEncoded());
+            return BaseEncoding.base64().encode(key.getEncoded());
         } catch (Exception e) {
             throw new IllegalStateException("Problems generating player key", e);
         }
