@@ -52,23 +52,6 @@ public final class Game implements MapSerializable {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Game game = (Game) o;
-        return Objects.equal(title, game.title);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(title);
-    }
-
-    @Override
     public String toString() {
         return "Game '" + title + "'";
     }
@@ -99,4 +82,24 @@ public final class Game implements MapSerializable {
                 MapSerializable.loadURL(map, "url")
         );
     }
+
+    //CHECKSTYLE:OFF
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Game game = (Game) o;
+        return Objects.equal(title, game.title) &&
+                Objects.equal(description, game.description) &&
+                Objects.equal(rules, game.rules) &&
+                Objects.equal(url, game.url);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(title, description, rules, url);
+    }
+
+    //CHECKSTYLE:ON
 }

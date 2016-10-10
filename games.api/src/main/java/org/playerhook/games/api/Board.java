@@ -3,10 +3,11 @@ package org.playerhook.games.api;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.*;
-
 import org.playerhook.games.util.MapSerializable;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public final class Board implements MapSerializable {
@@ -144,23 +145,6 @@ public final class Board implements MapSerializable {
         return true;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Board board1 = (Board) o;
-        return firstColumn == board1.firstColumn && width == board1.width && firstRow == board1.firstRow && height == board1.height && Objects.equal(board, board1.board);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(firstColumn, width, firstRow, height, board);
-    }
-
     public Map<String, Object> toMap(PrivacyLevel level) {
         return ImmutableMap.of(
             "firstColumn", firstColumn,
@@ -188,4 +172,23 @@ public final class Board implements MapSerializable {
             MapSerializable.loadList(map.getOrDefault("tokenPlacements", ImmutableList.of()), TokenPlacement::load)
         );
     }
+
+    //CHECKSTYLE:OFF
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Board board1 = (Board) o;
+        return firstColumn == board1.firstColumn &&
+                width == board1.width &&
+                firstRow == board1.firstRow &&
+                height == board1.height &&
+                Objects.equal(board, board1.board);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(firstColumn, width, firstRow, height, board);
+    }
+    //CHECKSTYLE:ON
 }

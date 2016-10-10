@@ -70,14 +70,17 @@ public interface Rules extends MapSerializable {
 
         private final Move move;
         private final ImmutableMap<Player, Integer> scoreUpdates;
+        private final ImmutableMap<Player, Deck> decksUpdates;
         private final Status nextStatus;
         private final Player nextPlayer;
 
-        EvaluationResult(Move move, ImmutableMap<Player, Integer> scoreUpdates, Status nextStatus, Player nextPlayer) {
+        EvaluationResult(Move move, ImmutableMap<Player, Integer> scoreUpdates, ImmutableMap<Player, Deck> decksUpdates,
+                         Status nextStatus, Player nextPlayer) {
             this.move = checkNotNull(move, "Move cannot must be set");
             this.nextStatus = nextStatus;
             this.nextPlayer = checkNotNull(nextPlayer, "Next player must be set (even the game has been finished already)");
             this.scoreUpdates = Optional.ofNullable(scoreUpdates).orElse(ImmutableMap.of());
+            this.decksUpdates = Optional.ofNullable(decksUpdates).orElse(ImmutableMap.of());
         }
 
         public Move getMove() {
@@ -102,6 +105,7 @@ public interface Rules extends MapSerializable {
 
             private RuleViolation violation;
             private ImmutableMap.Builder<Player, Integer> scoreChanges = ImmutableMap.builder();
+            private ImmutableMap.Builder<Player, Deck> decksUpdates = ImmutableMap.builder();
             private Status nextStatus;
             private Player nextPlayer;
 
@@ -111,6 +115,11 @@ public interface Rules extends MapSerializable {
 
             public Builder updateScore(Player player, int update) {
                 this.scoreChanges.put(player, update);
+                return this;
+            }
+
+            public Builder updateDeck(Player player, Deck update) {
+                this.decksUpdates.put(player, update);
                 return this;
             }
 
@@ -138,6 +147,7 @@ public interface Rules extends MapSerializable {
                 return new EvaluationResult(
                         Move.to(placement, violation),
                         scoreChanges.build(),
+                        decksUpdates.build(),
                         nextStatus,
                         Optional.ofNullable(nextPlayer).orElse(placement.getPlayer())
                 );

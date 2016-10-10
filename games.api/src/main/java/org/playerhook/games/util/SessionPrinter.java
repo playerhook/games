@@ -49,8 +49,8 @@ public final class SessionPrinter {
         out.println(Strings.repeat("=", 60));
         out.println(center(session.getGame().getTitle(), 60, ' '));
 
-        if (!session.getPlayedMoves().isEmpty()) {
-            Move last = Iterables.getLast(session.getPlayedMoves());
+        if (!session.getMoves().isEmpty()) {
+            Move last = Iterables.getLast(session.getMoves());
             if (last.getRuleViolation().isPresent()) {
                 out.println(Strings.repeat("-", 60));
                 out.println(last.getRuleViolation().get().getMessage());
@@ -100,10 +100,10 @@ public final class SessionPrinter {
     }
 
     private boolean isLastPlacement(Session session, TokenPlacement tokenPlacement) {
-        if (session.getPlayedMoves().isEmpty()) {
+        if (session.getMoves().isEmpty()) {
             return false;
         }
-        return Iterables.getLast(session.getPlayedMoves()).getTokenPlacement().equals(tokenPlacement);
+        return Iterables.getLast(session.getMoves()).getTokenPlacement().equals(tokenPlacement);
     }
 
     private static String center(String s, int size, char pad) {

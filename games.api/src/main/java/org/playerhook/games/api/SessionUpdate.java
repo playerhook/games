@@ -1,12 +1,11 @@
 package org.playerhook.games.api;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import org.playerhook.games.util.MapSerializable;
 
-import java.net.URL;
 import java.util.Map;
-import java.util.function.BiConsumer;
 
 public final class SessionUpdate implements MapSerializable {
 
@@ -35,7 +34,7 @@ public final class SessionUpdate implements MapSerializable {
         return ImmutableMap.of("session", session.toMap(level), "type", type.getCode());
     }
 
-    public static SessionUpdate materialize(Object payload, BiConsumer<URL, TokenPlacement> onPlay) {
+    public static SessionUpdate materialize(Object payload) {
         if (payload == null) {
             return null;
         }
@@ -43,8 +42,7 @@ public final class SessionUpdate implements MapSerializable {
             throw new IllegalArgumentException("Cannot load session update from " + payload);
         }
         Map<String, Object> map = (Map<String, Object>) payload;
-        return new SessionUpdate(
-            new RemoteSession(map.get("session"), onPlay),
+        return new SessionUpdate(DefaultSession.load(map.get("session")),
             SessionUpdateType.load(MapSerializable.loadString(map, "type"))
         );
     }
@@ -53,4 +51,22 @@ public final class SessionUpdate implements MapSerializable {
     public String toString() {
         return "Update: " + type + " for " + session;
     }
+
+    //CHECKSTYLE:OFF
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SessionUpdate update = (SessionUpdate) o;
+        return Objects.equal(session, update.session) &&
+                Objects.equal(type, update.type);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(session, type);
+    }
+
+    //CHECKSTYLE:ON
 }

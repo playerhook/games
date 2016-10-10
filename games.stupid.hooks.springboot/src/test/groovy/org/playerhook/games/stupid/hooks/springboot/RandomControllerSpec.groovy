@@ -36,23 +36,20 @@ class RandomControllerSpec extends Specification {
 
     @Test void "test hook"() {
         SecureRandom random = new SecureRandom()
-        LocalSession session = TicTacToeRules.matchThree(null,
-                new URL('http://private-f8637-playerhook.apiary-mock.com/games/session/xyz'))
 
         Player dartagnan = Player.create('dartagnan')
         Player athos = Player.create('athos')
 
-        session.join(dartagnan)
-        session.join(athos)
-
-        session.start()
+        LocalSession session = TicTacToeRules
+            .matchThree(null, new URL('http://private-f8637-playerhook.apiary-mock.com/games/session/xyz'))
+            .join(dartagnan).join(athos).start()
 
         for (int i = 0; i < 5; i++) {
             Player onTurn = session.playerOnTurn.get()
             int nextRow = session.board.firstRow + random.nextInt(session.board.height)
             int nextCol = session.board.firstColumn + random.nextInt(session.board.width)
             Token token = session.getDeck(onTurn).playableTokens.first()
-            session.play(TokenPlacement.create(token, onTurn, Position.at(nextRow, nextCol)))
+            session = session.play(TokenPlacement.create(token, onTurn, Position.at(nextRow, nextCol)))
         }
 
         when:

@@ -45,6 +45,9 @@ public interface MapSerializable {
     static int loadInteger(Map<String, Object> map, String property) {
         return Integer.valueOf(Optional.ofNullable(map.get(property)).map(Object::toString).orElseThrow(() -> new IllegalArgumentException(property + " is missing!")));
     }
+    static long loadLong(Map<String, Object> map, String property) {
+        return Long.valueOf(Optional.ofNullable(map.get(property)).map(Object::toString).orElseThrow(() -> new IllegalArgumentException(property + " is missing!")));
+    }
 
     static String loadString(Map<String, Object> map, String property) {
         return Optional.ofNullable(map.get(property)).map(Object::toString).orElse(null);

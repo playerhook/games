@@ -1,5 +1,6 @@
 package org.playerhook.games.api;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import org.playerhook.games.util.MapSerializable;
@@ -103,4 +104,25 @@ public final class TokenPlacement implements MapSerializable {
             MapSerializable.loadString(map, "key")
         );
     }
+
+    //CHECKSTYLE:OFF
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TokenPlacement placement = (TokenPlacement) o;
+        return Objects.equal(token, placement.token) &&
+                Objects.equal(player, placement.player) &&
+                Objects.equal(source, placement.source) &&
+                Objects.equal(destination, placement.destination) &&
+                Objects.equal(key, placement.key);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(token, player, source, destination, key);
+    }
+
+    //CHECKSTYLE:ON
 }
