@@ -92,7 +92,7 @@ public final class Game implements MapSerializable {
         Game game = (Game) o;
         return Objects.equal(title, game.title) &&
                 Objects.equal(description, game.description) &&
-                Objects.equal(rules, game.rules) &&
+                Objects.equal(rules.getType(), game.rules.getType()) &&
                 Objects.equal(url, game.url);
     }
 
