@@ -14,7 +14,7 @@ import static org.playerhook.games.util.MapSerializable.*;
 
 final class DefaultSession implements Session {
 
-    private final long version;
+    private final long round;
     private final Board board;
     private final Game game;
     private final Status status;
@@ -25,10 +25,10 @@ final class DefaultSession implements Session {
     private final ImmutableMap<Player, Deck> decks;
     private final ImmutableMap<Player, Integer> scores;
 
-    DefaultSession(long version, Board board, Game game, Status status, ImmutableList<Player> players,
+    DefaultSession(long round, Board board, Game game, Status status, ImmutableList<Player> players,
                    Player activePlayer, URL url, ImmutableList<Move> moves, ImmutableMap<Player, Deck> decks,
                    ImmutableMap<Player, Integer> scores) {
-        this.version = version;
+        this.round = round;
         this.board = board;
         this.game = game;
         this.status = status;
@@ -132,20 +132,25 @@ final class DefaultSession implements Session {
     }
 
     @Override
+    public TokenPlacement newPlacement(Token token, Player player, Position source, Position destination) {
+        return TokenPlacement.create(token, player, source, destination, null, round);
+    }
+
+    @Override
     public String toString() {
         return "Session: " + url + " of " + getGame();
     }
 
     @Override
-    public long getVersion() {
-        return version;
+    public Long getRound() {
+        return round;
     }
 
     @Override
     public Map<String, Object> toMap(PrivacyLevel level) {
         ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
 
-        builder.put("version", version);
+        builder.put("version", round);
         builder.put("game", getGame().toMap(level));
         builder.put("board", getBoard().toMap(level));
         builder.put("players", getPlayers().stream().map((player2) -> player2.toMap(level)).collect(Collectors.toList()));
@@ -179,7 +184,7 @@ final class DefaultSession implements Session {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DefaultSession that = (DefaultSession) o;
-        return version == that.version &&
+        return round == that.round &&
                 com.google.common.base.Objects.equal(board, that.board) &&
                 Objects.equal(game, that.game) &&
                 status == that.status &&
@@ -193,7 +198,7 @@ final class DefaultSession implements Session {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(version, board, game, status, players, activePlayer, url, moves, decks, scores);
+        return Objects.hashCode(round, board, game, status, players, activePlayer, url, moves, decks, scores);
     }
 
     //CHECKSTYLE:ON

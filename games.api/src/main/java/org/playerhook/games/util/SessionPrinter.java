@@ -46,7 +46,8 @@ public final class SessionPrinter {
     }
 
     public void print(Session session) {
-        out.println(Strings.repeat("=", 60));
+        out.print(Strings.padStart(Optional.ofNullable(session.getRound()).orElse(0L).toString(), 59, '='));
+        out.println('=');
         out.println(center(session.getGame().getTitle(), 60, ' '));
 
         if (!session.getMoves().isEmpty()) {
@@ -58,8 +59,6 @@ public final class SessionPrinter {
         }
 
         int boardSectionWidth = session.getBoard().getWidth() * 2 + 1;
-
-        out.println(Strings.repeat("=", 60));
 
         for (Player player: session.getPlayers()) {
             if (player.equals(session.getPlayerOnTurn().orElse(null))) {

@@ -7,7 +7,6 @@ import org.playerhook.games.api.Player
 import org.playerhook.games.api.Position
 import org.playerhook.games.api.SessionUpdateType
 import org.playerhook.games.api.Token
-import org.playerhook.games.api.TokenPlacement
 import org.playerhook.games.tictactoe.TicTacToeRules
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -49,7 +48,7 @@ class RandomControllerSpec extends Specification {
             int nextRow = session.board.firstRow + random.nextInt(session.board.height)
             int nextCol = session.board.firstColumn + random.nextInt(session.board.width)
             Token token = session.getDeck(onTurn).playableTokens.first()
-            session = session.play(TokenPlacement.create(token, onTurn, Position.at(nextRow, nextCol)))
+            session = session.play(session.newPlacement(token, onTurn, Position.at(nextRow, nextCol)))
         }
 
         when:

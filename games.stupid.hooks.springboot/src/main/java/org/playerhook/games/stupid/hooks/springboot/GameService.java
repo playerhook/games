@@ -8,6 +8,7 @@ import org.playerhook.games.util.SessionPrinter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URL;
@@ -18,12 +19,17 @@ import java.util.Optional;
 public class GameService {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private final SecureRandom random = new SecureRandom();
 
     public void sendPlacement(URL url, TokenPlacement placement) {
         if (log.isInfoEnabled()) {
             log.info("Notifying session " + url + " with " + placement);
         }
-        new RestTemplate().postForObject(url.toExternalForm(), placement.toMap(MapSerializable.PrivacyLevel.PROTECTED), Acknowledgement.class);
+        try {
+            new RestTemplate().postForObject(url.toExternalForm(), placement.toMap(MapSerializable.PrivacyLevel.PROTECTED), Acknowledgement.class);
+        } catch (RestClientException e) {
+            log.error("Exception sending placement " + placement + " to " + url + ": " + e.toString());
+        }
     }
 
     public void playIfOnTurn(SessionUpdate update, String username, String key) {
@@ -74,11 +80,21 @@ public class GameService {
 
         Token token = playableTokens.get(0);
 
-        SecureRandom random = new SecureRandom();
+        session.getURL().ifPresent(url -> sendPlacement(url, randomPlacement(key, session, player, token)));
+    }
 
-        int nextRow = session.getBoard().getFirstRow() + random.nextInt(session.getBoard().getHeight());
-        int nextCol = session.getBoard().getFirstColumn() + random.nextInt(session.getBoard().getHeight());
-        TokenPlacement placement = TokenPlacement.create(token, player, Position.at(nextRow, nextCol), key);
-        session.getURL().ifPresent(url -> sendPlacement(url, placement));
+    private TokenPlacement randomPlacement(String key, Session session, Player player, Token token) {
+        int counter = 0;
+        while (++counter <= 100) {
+            int nextRow = session.getBoard().getFirstRow() + random.nextInt(session.getBoard().getHeight());
+            int nextCol = session.getBoard().getFirstColumn() + random.nextInt(session.getBoard().getHeight());
+            if (!session.getBoard().getTokenPlacement(Position.at(nextRow, nextCol)).isPresent()
+                    || session.getBoard().isCompletelyFilled()
+                    || counter == 100
+            ) {
+                return session.newPlacement(token, player, Position.at(nextRow, nextCol)).sign(key);
+            }
+        }
+        throw new IllegalStateException("Problem retrieving next random move after 100 attemps!");
     }
 }

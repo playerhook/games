@@ -29,8 +29,8 @@ final class DefaultObservableLocalSession implements ObservableLocalSession {
     }
 
     @Override
-    public long getVersion() {
-        return delegate.getVersion();
+    public Long getRound() {
+        return delegate.getRound();
     }
 
     @Override
@@ -152,6 +152,11 @@ final class DefaultObservableLocalSession implements ObservableLocalSession {
 
     @FunctionalInterface private interface UnsafeSessionOperation {
         LocalSession run();
+    }
+
+    @Override
+    public TokenPlacement newPlacement(Token token, Player player, Position source, Position destination) {
+        return delegate.newPlacement(token, player, source, destination);
     }
 
     //CHECKSTYLE:OFF

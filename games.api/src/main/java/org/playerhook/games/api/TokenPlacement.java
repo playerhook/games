@@ -15,36 +15,42 @@ public final class TokenPlacement implements MapSerializable {
     private final Position source;
     private final Position destination;
     private final String key;
+    private final Long round;
 
 
-    public static TokenPlacement create(Token token, Player player, Position destination) {
-        return new TokenPlacement(token, player, null, destination, null);
+    static TokenPlacement create(Token token, Player player, Position destination) {
+        return new TokenPlacement(token, player, null, destination, null, null);
     }
 
-    public static TokenPlacement create(Token token, Player player, Position destination, String key) {
-        return new TokenPlacement(token, player, null, destination, key);
+    static TokenPlacement create(Token token, Player player, Position destination, String key) {
+        return new TokenPlacement(token, player, null, destination, key, null);
     }
 
-    public TokenPlacement sign(String key){
-        if (key.equals(this.key)) {
-            return this;
-        }
-        return new TokenPlacement(token, player, source, destination, key);
+    static TokenPlacement create(Token token, Player player, Position destination, String key, Long round) {
+        return new TokenPlacement(token, player, null, destination, key, round);
     }
 
-    public TokenPlacement unsigned(){
+    static TokenPlacement create(Token token, Player player, Position source, Position destination, String key, Long round) {
+        return new TokenPlacement(token, player, source, destination, key, round);
+    }
+
+    public TokenPlacement sign(String key) {
         if (key == null) {
             return this;
         }
-        return new TokenPlacement(token, player, source, destination, null);
+        if (key.equals(this.key)) {
+            return this;
+        }
+        return new TokenPlacement(token, player, source, destination, key, round);
     }
 
-    private TokenPlacement(Token token, Player player, Position source, Position destination, String key) {
+    private TokenPlacement(Token token, Player player, Position source, Position destination, String key, Long round) {
         this.token = Preconditions.checkNotNull(token, "Token cannot be null");
         this.player = Preconditions.checkNotNull(player, "Player cannot be null");
         this.destination = Preconditions.checkNotNull(destination, "Destination cannot be null");
         this.source = source;
         this.key = key;
+        this.round = round;
     }
 
     public Token getToken() {
@@ -67,6 +73,10 @@ public final class TokenPlacement implements MapSerializable {
         return Optional.ofNullable(key);
     }
 
+    public Optional<Long> getRound() {
+        return Optional.ofNullable(round);
+    }
+
     public String toString() {
         if (source == null) {
             return getPlayer().toString() + " placed " + getToken() + " on " + getDestination();
@@ -82,6 +92,7 @@ public final class TokenPlacement implements MapSerializable {
         builder.put("player", player.toMap(level));
         getSource().ifPresent(source ->  builder.put("source", source.toMap(level)));
         getKey().ifPresent(key ->  builder.put("key", key));
+        getRound().ifPresent(round ->  builder.put("round", round));
         builder.put("destination", destination.toMap(level));
 
         return builder.build();
@@ -101,7 +112,8 @@ public final class TokenPlacement implements MapSerializable {
             Player.load(map.get("player")),
             Position.load(map.get("source")),
             Position.load(map.get("destination")),
-            MapSerializable.loadString(map, "key")
+            MapSerializable.loadString(map, "key"),
+            MapSerializable.loadLong(map, "round")
         );
     }
 

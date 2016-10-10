@@ -7,7 +7,6 @@ import org.playerhook.games.api.Player
 import org.playerhook.games.api.Position
 import org.playerhook.games.api.SessionUpdate
 import org.playerhook.games.api.Token
-import org.playerhook.games.api.TokenPlacement
 import org.playerhook.games.util.SessionPrinter
 import spock.lang.Specification
 
@@ -73,7 +72,7 @@ class TicTacToeSessionSpec extends Specification {
             int nextRow = s.board.firstRow + random.nextInt(s.board.height)
             int nextCol = s.board.firstColumn + random.nextInt(s.board.width)
             Token token = s.getDeck(onTurn).playableTokens.first()
-            s = s.play(s.sign(TokenPlacement.create(token, onTurn, Position.at(nextRow, nextCol))))
+            s = s.play(s.sign(s.newPlacement(token, onTurn, Position.at(nextRow, nextCol))))
         }
     }
 

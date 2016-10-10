@@ -72,7 +72,7 @@ final class DefaultLocalSession implements LocalSession {
     @Override
     public LocalSession signWith(String privateKey) {
         return new DefaultLocalSession(
-                delegate.getVersion() + 1,
+                delegate.getRound() + 1,
                 delegate.getGame(),
                 delegate.getBoard(),
                 delegate.getURL().orElse(null),
@@ -125,7 +125,7 @@ final class DefaultLocalSession implements LocalSession {
         }
         if (hasEmptySeat()) {
             return new DefaultLocalSession(
-                    getVersion() + 1,
+                    getRound() + 1,
                     getGame(),
                     getBoard(),
                     getURL().orElse(null),
@@ -148,7 +148,7 @@ final class DefaultLocalSession implements LocalSession {
         }
         if (canStart()) {
             return new DefaultLocalSession(
-                    getVersion() + 1,
+                    getRound() + 1,
                     getGame(),
                     getBoard(),
                     getURL().orElse(null),
@@ -190,7 +190,7 @@ final class DefaultLocalSession implements LocalSession {
 
         if (genericChecks.getMove().getRuleViolation().isPresent()) {
             return new DefaultLocalSession(
-                    getVersion() + 1,
+                    getRound() + 1,
                     getGame(),
                     getBoard(),
                     getURL().orElse(null),
@@ -210,7 +210,7 @@ final class DefaultLocalSession implements LocalSession {
 
         if (move.getRuleViolation().isPresent()) {
             return new DefaultLocalSession(
-                    getVersion() + 1,
+                    getRound() + 1,
                     getGame(),
                     getBoard(),
                     getURL().orElse(null),
@@ -245,7 +245,7 @@ final class DefaultLocalSession implements LocalSession {
         }
 
         return new DefaultLocalSession(
-                getVersion() + 1,
+                getRound() + 1,
                 getGame(),
                 board,
                 getURL().orElse(null),
@@ -315,7 +315,7 @@ final class DefaultLocalSession implements LocalSession {
         String key = MapSerializable.loadString(payload, "key");
 
         return new DefaultLocalSession(
-                defaultSession.getVersion(),
+                defaultSession.getRound(),
                 defaultSession.getGame(),
                 defaultSession.getBoard(),
                 defaultSession.getURL().orElse(null),
@@ -364,8 +364,13 @@ final class DefaultLocalSession implements LocalSession {
     }
 
     @Override
-    public long getVersion() {
-        return delegate.getVersion();
+    public Long getRound() {
+        return delegate.getRound();
+    }
+
+    @Override
+    public TokenPlacement newPlacement(Token token, Player player, Position source, Position destination) {
+        return TokenPlacement.create(token, player, source, destination, key, delegate.getRound());
     }
 
     //CHECKSTYLE:OFF
