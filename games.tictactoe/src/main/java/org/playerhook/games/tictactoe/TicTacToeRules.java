@@ -5,7 +5,7 @@ import org.playerhook.games.api.*;
 
 import java.net.URL;
 
-import static org.playerhook.games.api.LocalSession.findOrCreate;
+import static org.playerhook.games.api.LocalSession.create;
 
 public class TicTacToeRules implements Rules {
 
@@ -13,19 +13,19 @@ public class TicTacToeRules implements Rules {
     private static final String GAME_DESCRIPTION = "Create line of tokens to win";
 
     public static LocalSession matchThree(URL gameUrl, URL sessionUrl) {
-        return findOrCreate(Game.of(GAME_NAME, GAME_DESCRIPTION + " on " + 3, gameUrl, new Three()), sessionUrl);
+        return create(Game.of(GAME_NAME, GAME_DESCRIPTION + " on " + 3, gameUrl, new Three()), sessionUrl);
     }
 
     public static LocalSession matchFour(URL gameUrl, URL sessionUrl) {
-        return findOrCreate(Game.of(GAME_NAME, GAME_DESCRIPTION + " on " + 4, gameUrl, new Four()), sessionUrl);
+        return create(Game.of(GAME_NAME, GAME_DESCRIPTION + " on " + 4, gameUrl, new Four()), sessionUrl);
     }
 
     public static LocalSession matchFive(URL gameUrl, URL sessionUrl) {
-        return findOrCreate(Game.of(GAME_NAME, GAME_DESCRIPTION + " on " + 5, gameUrl, new Five()), sessionUrl);
+        return create(Game.of(GAME_NAME, GAME_DESCRIPTION + " on " + 5, gameUrl, new Five()), sessionUrl);
     }
 
     public static LocalSession matchSix(URL gameUrl, URL sessionUrl) {
-        return findOrCreate(Game.of(GAME_NAME, GAME_DESCRIPTION + " on " + 6, gameUrl, new Six()), sessionUrl);
+        return create(Game.of(GAME_NAME, GAME_DESCRIPTION + " on " + 6, gameUrl, new Six()), sessionUrl);
     }
 
     public static class Three extends TicTacToeRules {

@@ -26,7 +26,7 @@ public class GameService {
         new RestTemplate().postForObject(url.toExternalForm(), placement.toMap(MapSerializable.PrivacyLevel.PROTECTED), Acknowledgement.class);
     }
 
-    public void playIfOnTurn(SessionUpdate update, String username) {
+    public void playIfOnTurn(SessionUpdate update, String username, String key) {
         if (log.isInfoEnabled()) {
             log.info("Processing session update for " + username + ": " + update + "\n" + SessionPrinter.toString(update));
         }
@@ -78,6 +78,7 @@ public class GameService {
 
         int nextRow = session.getBoard().getFirstRow() + random.nextInt(session.getBoard().getHeight());
         int nextCol = session.getBoard().getFirstColumn() + random.nextInt(session.getBoard().getHeight());
-        session.play(TokenPlacement.create(token, player, Position.at(nextRow, nextCol)));
+        TokenPlacement placement = TokenPlacement.create(token, player, Position.at(nextRow, nextCol), key);
+        session.getURL().ifPresent(url -> sendPlacement(url, placement));
     }
 }

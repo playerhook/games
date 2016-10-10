@@ -10,6 +10,7 @@ public interface RuleViolation {
         POSITION_ALREADY_TAKEN("The position given is already taken!"),
         TOKEN_NOT_ALLOWED_ON_GIVEN_POSITION("You cannot place your token at given position!"),
         ILLEGAL_TOKEN("You cannot play with this token!"),
+        GAME_OVER("Game already finished!"),
         GAME_NOT_STARTED_YET("Game has't started yet!"),
         KEY_MISMATCH("Session key does not match"),
         KEY_MISSING("Session is signed but no player key is present");
@@ -54,7 +55,7 @@ public interface RuleViolation {
         }
     }
 
-    public static RuleViolation load(String code) {
+    static RuleViolation load(String code) {
         if (code == null) {
             return null;
         }

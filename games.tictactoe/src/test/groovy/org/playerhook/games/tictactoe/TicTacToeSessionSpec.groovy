@@ -26,22 +26,16 @@ class TicTacToeSessionSpec extends Specification {
             LocalSession session = TicTacToeRules.matchThree(
                     new URL('http://www.example.com/ttt'),
                     new URL('http://www.example.com/ttt/123')
-            )
+            ).asObservableSession()
 
-            session.asObservable().subscribe {
+            session.observe().subscribe {
                 printSession(it)
             }
 
             Player dartagnan = Player.create('dartagnan')
             Player athos = Player.create('athos')
 
-            session.join(dartagnan)
-            session.join(athos)
-            session.signWith('pa$$word')
-
-            session.start()
-
-            finish(session)
+            finish(session.join(dartagnan).join(athos).signWith('pa$$word').start())
 
         then:
             noExceptionThrown()
@@ -52,12 +46,12 @@ class TicTacToeSessionSpec extends Specification {
             LocalSession session = TicTacToeRules.matchThree(
                     new URL('http://www.example.com/ttt'),
                     new URL('http://www.example.com/ttt/345')
-            )
+            ).asObservableSession()
 
-            session.asObservable().subscribe {
+            session.observe().subscribe {
                 Object map = it.toMap(PROTECTED)
                 String json = JsonOutput.prettyPrint(JsonOutput.toJson(map))
-                SessionUpdate update = materialize(new JsonSlurper().parseText(json)) { url, tokenPlacement -> }
+                SessionUpdate update = materialize(new JsonSlurper().parseText(json))
                 String other = JsonOutput.prettyPrint(JsonOutput.toJson(update.toMap(PROTECTED)))
                 assert json == other
             }
@@ -65,25 +59,21 @@ class TicTacToeSessionSpec extends Specification {
             Player dartagnan = Player.create('dartagnan')
             Player athos = Player.create('athos')
 
-            session.join(dartagnan)
-            session.join(athos)
-
-            session.start()
-
-            finish(session)
+            finish(session.join(dartagnan).join(athos).start())
 
         then:
             noExceptionThrown()
     }
 
     protected static void finish(LocalSession session) {
+        LocalSession s = session
         SecureRandom random = new SecureRandom()
-        while (!session.finished) {
-            Player onTurn = session.playerOnTurn.get()
-            int nextRow = session.board.firstRow + random.nextInt(session.board.height)
-            int nextCol = session.board.firstColumn + random.nextInt(session.board.width)
-            Token token = session.getDeck(onTurn).playableTokens.first()
-            session.play(session.sign(TokenPlacement.create(token, onTurn, Position.at(nextRow, nextCol))))
+        while (!s.finished) {
+            Player onTurn = s.playerOnTurn.get()
+            int nextRow = s.board.firstRow + random.nextInt(s.board.height)
+            int nextCol = s.board.firstColumn + random.nextInt(s.board.width)
+            Token token = s.getDeck(onTurn).playableTokens.first()
+            s = s.play(s.sign(TokenPlacement.create(token, onTurn, Position.at(nextRow, nextCol))))
         }
     }
 

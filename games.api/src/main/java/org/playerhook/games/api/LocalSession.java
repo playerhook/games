@@ -1,7 +1,5 @@
 package org.playerhook.games.api;
 
-import rx.Observable;
-
 import java.net.URL;
 import java.util.Optional;
 
@@ -16,13 +14,14 @@ public interface LocalSession extends Session {
      * @return existing or new session
      * @throws IllegalArgumentException if the session already exists with different game
      */
-    static LocalSession findOrCreate(Game game, URL url) {
-        return DefaultLocalSession.get(game, url);
+    static LocalSession create(Game game, URL url) {
+        return DefaultLocalSession.newSession(game, url);
     }
 
-    void join(Player newPlayer);
+    LocalSession join(Player newPlayer);
+    LocalSession play(TokenPlacement placement);
 
-    void signWith(String privateKey);
+    LocalSession signWith(String privateKey);
 
     Optional<String> getKey(Player player);
 
@@ -34,8 +33,7 @@ public interface LocalSession extends Session {
         return placement;
     }
 
-    void start();
-    Observable<SessionUpdate> asObservable();
+    LocalSession start();
 
     default boolean hasEmptySeat() {
         return getPlayers().size() < getGame().getRules().getMaxPlayers();
@@ -58,15 +56,11 @@ public interface LocalSession extends Session {
         return DefaultLocalSession.load(payload);
     }
 
-    /**
-     * Finds the existing session by given URL.
-     *
-     * If the session is already finished or does not exist yet returns null.
-     *
-     * @param url url uniquely identifying the session
-     * @return the existing session if exists or null otherwise
-     */
-    static LocalSession find(URL url) {
-        return DefaultLocalSession.find(url);
+    default ObservableLocalSession asObservableSession() {
+        if (this instanceof DefaultObservableLocalSession) {
+            return (ObservableLocalSession) this;
+        }
+        return new DefaultObservableLocalSession(this);
     }
+
 }

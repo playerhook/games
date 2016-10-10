@@ -9,6 +9,8 @@ import com.google.common.base.Objects;
  */
 public interface Token {
 
+    Token HIDDEN = new Stub("?");
+
     /**
      * @return unique symbol for current game
      */
