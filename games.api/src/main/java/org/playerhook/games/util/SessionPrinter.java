@@ -46,8 +46,7 @@ public final class SessionPrinter {
     }
 
     public void print(Session session) {
-        out.print(Strings.repeat("=", 60));
-        out.println('=');
+        out.println(Strings.repeat("=", 60));
         out.println(center(session.getGame().getTitle(), 60, ' '));
         out.println(Strings.repeat("-", 60));
         session.getURL().ifPresent(url -> {
