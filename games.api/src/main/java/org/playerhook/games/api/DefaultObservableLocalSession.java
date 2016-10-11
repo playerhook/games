@@ -109,19 +109,12 @@ final class DefaultObservableLocalSession implements ObservableLocalSession {
     }
 
     private void sendUpdate(LocalSession original, LocalSession updated) {
-        if (!original.getStatus().equals(updated.getStatus())) {
-            subject.onNext(SessionUpdate.of(updated, SessionUpdateType.Default.STATUS));
-            if (Status.FINISHED.equals(updated.getStatus())) {
+        SessionUpdate.diff(original, updated).ifPresent(update -> {
+            subject.onNext(update);
+            if (update.getType() == SessionUpdateType.Default.STATUS && updated.getStatus() == Status.FINISHED) {
                 subject.onCompleted();
             }
-        }
-        if (!original.getPlayers().equals(updated.getPlayers())) {
-            subject.onNext(SessionUpdate.of(updated, SessionUpdateType.Default.PLAYER));
-        }
-        if (!original.getMoves().equals(updated.getMoves())) {
-            subject.onNext(SessionUpdate.of(updated, SessionUpdateType.Default.MOVE));
-        }
-
+        });
     }
 
     @Override

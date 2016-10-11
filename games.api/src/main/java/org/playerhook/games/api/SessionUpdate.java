@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import org.playerhook.games.util.MapSerializable;
 
 import java.util.Map;
+import java.util.Optional;
 
 public final class SessionUpdate implements MapSerializable {
 
@@ -14,6 +15,19 @@ public final class SessionUpdate implements MapSerializable {
 
     public static SessionUpdate of(Session session, SessionUpdateType type) {
         return new SessionUpdate(session, type);
+    }
+
+    public static Optional<SessionUpdate> diff(Session original, Session updated) {
+        if (!original.getStatus().equals(updated.getStatus())) {
+            return Optional.of(SessionUpdate.of(updated, SessionUpdateType.Default.STATUS));
+        }
+        if (!original.getPlayers().equals(updated.getPlayers())) {
+            return Optional.of(SessionUpdate.of(updated, SessionUpdateType.Default.PLAYER));
+        }
+        if (!original.getMoves().equals(updated.getMoves())) {
+            return Optional.of(SessionUpdate.of(updated, SessionUpdateType.Default.MOVE));
+        }
+        return Optional.empty();
     }
 
     private SessionUpdate(Session session, SessionUpdateType type) {
