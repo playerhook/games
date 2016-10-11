@@ -285,7 +285,7 @@ final class DefaultLocalSession implements LocalSession {
         if (playerOnTurn.isPresent() && !playerOnTurn.get().equals(placement.getPlayer())) {
             return Rules.EvaluationResult.builder(placement).ruleViolation(RuleViolation.Default.NOT_YOUR_TURN).build();
         }
-        if (!getDeck(placement.getPlayer()).getPlayableTokens().contains(placement.getToken())) {
+        if (!Token.contains(getDeck(placement.getPlayer()).getPlayableTokens(), placement.getToken())) {
             return Rules.EvaluationResult.builder(placement).ruleViolation(RuleViolation.Default.ILLEGAL_TOKEN).build();
         }
         if (getBoard().getTokenPlacement(placement.getDestination()).isPresent()) {

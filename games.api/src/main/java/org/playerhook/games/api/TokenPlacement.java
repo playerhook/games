@@ -98,6 +98,14 @@ public final class TokenPlacement implements MapSerializable {
         return builder.build();
     }
 
+    /**
+     * Deserializes the token placement.
+     *
+     * Token is always a {@link org.playerhook.games.api.Token.Stub}.
+     *
+     * @param tokenPlacement token placement as map
+     * @return token placement from map
+     */
     public static TokenPlacement load(Object tokenPlacement) {
         if (tokenPlacement == null) {
             return null;
@@ -124,7 +132,7 @@ public final class TokenPlacement implements MapSerializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TokenPlacement placement = (TokenPlacement) o;
-        return Objects.equal(token, placement.token) &&
+        return Token.equals(token, placement.token) &&
                 Objects.equal(player, placement.player) &&
                 Objects.equal(source, placement.source) &&
                 Objects.equal(destination, placement.destination) &&

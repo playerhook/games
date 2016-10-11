@@ -1,6 +1,7 @@
 package org.playerhook.games.api;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.Iterables;
 
 /**
  * Game token such as pawn in chess.
@@ -54,6 +55,10 @@ public interface Token {
 
     static boolean equals(Token token, Token another) {
         return token.getSymbol().equals(another.getSymbol());
+    }
+
+    static boolean contains(Iterable<Token> tokens, Token another) {
+        return Iterables.contains(Iterables.transform(tokens, Token::getSymbol), another.getSymbol());
     }
 
 }
