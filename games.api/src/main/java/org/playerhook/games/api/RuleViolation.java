@@ -13,7 +13,8 @@ public interface RuleViolation {
         GAME_OVER("Game already finished!"),
         GAME_NOT_STARTED_YET("Game has't started yet!"),
         KEY_MISMATCH("Session key does not match"),
-        KEY_MISSING("Session is signed but no player key is present");
+        KEY_MISSING("Session is signed but no player key is present"),
+        ROUND_MISMATCH("Session round mismatch");
 
         private final String message;
 

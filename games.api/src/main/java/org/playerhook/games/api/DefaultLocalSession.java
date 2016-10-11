@@ -260,6 +260,10 @@ final class DefaultLocalSession implements LocalSession {
     }
 
     private Rules.EvaluationResult doGenericChecks(TokenPlacement placement) {
+        Optional<Long> round = placement.getRound();
+        if (round.isPresent() && !java.util.Objects.equals(round.get(), getRound())) {
+            return Rules.EvaluationResult.builder(placement).ruleViolation(RuleViolation.Default.ROUND_MISMATCH).build();
+        }
         if (getStatus().equals(Status.FINISHED)) {
             return Rules.EvaluationResult.builder(placement).ruleViolation(RuleViolation.Default.GAME_OVER).build();
         }

@@ -49,7 +49,7 @@ final class DefaultSession implements Session {
 
         ImmutableList<Player> players = loadList(payload.getOrDefault("players", Collections.emptyList()), Player::load);
         return new DefaultSession(
-                loadLong(payload, "version"),
+                loadLong(payload, "round"),
                 Board.load(payload.getOrDefault("board", null)),
                 Game.load(payload.getOrDefault("game", null)),
                 Status.valueOf(payload.getOrDefault("status", Status.WAITING).toString()),
@@ -150,7 +150,7 @@ final class DefaultSession implements Session {
     public Map<String, Object> toMap(PrivacyLevel level) {
         ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
 
-        builder.put("version", round);
+        builder.put("round", round);
         builder.put("game", getGame().toMap(level));
         builder.put("board", getBoard().toMap(level));
         builder.put("players", getPlayers().stream().map((player2) -> player2.toMap(level)).collect(Collectors.toList()));
