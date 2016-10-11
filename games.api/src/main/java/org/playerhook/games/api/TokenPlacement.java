@@ -79,9 +79,15 @@ public final class TokenPlacement implements MapSerializable {
 
     public String toString() {
         if (source == null) {
-            return getPlayer().toString() + " placed " + getToken() + " on " + getDestination();
+            if (round == null) {
+                return player.toString() + " placed " + token + " on " + destination;
+            }
+            return player.toString() + " placed " + token + " on " + destination + " for round " + round;
         }
-        return getPlayer().toString() + " moved " + getToken() + " from " + source + " to " + getDestination();
+        if (round == null) {
+            return player.toString() + " moved " + token + " from " + source + " to " + destination;
+        }
+        return player.toString() + " moved " + token + " from " + source + " to " + destination + " for round " + round;
     }
 
     @Override

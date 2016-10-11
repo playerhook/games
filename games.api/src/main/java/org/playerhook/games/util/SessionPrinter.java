@@ -49,6 +49,11 @@ public final class SessionPrinter {
         out.print(Strings.padStart(Optional.ofNullable(session.getRound()).orElse(0L).toString(), 59, '='));
         out.println('=');
         out.println(center(session.getGame().getTitle(), 60, ' '));
+        out.println(Strings.repeat("-", 60));
+        session.getURL().ifPresent(url -> {
+            out.println(center(url.toString(), 60, ' '));
+            out.println(Strings.repeat("-", 60));
+        });
 
         if (!session.getMoves().isEmpty()) {
             Move last = Iterables.getLast(session.getMoves());
