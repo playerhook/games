@@ -164,6 +164,26 @@ final class DefaultLocalSession implements LocalSession {
         throw new IllegalStateException("Not enough players!");
     }
 
+    @Override
+    public LocalSession suspend() {
+        if (!getStatus().equals(Status.IN_PROGRESS)) {
+            throw new IllegalStateException("The game is not in progress!");
+        }
+        return new DefaultLocalSession(
+                delegate.getRound() + 1,
+                getGame(),
+                getBoard(),
+                getURL().orElse(null),
+                delegate.getDecks(),
+                delegate.getScores(),
+                getPlayers(),
+                getMoves(),
+                Status.SUSPENDED,
+                delegate.getPlayerOnTurn().orElse(null),
+                key
+        );
+    }
+
     private ImmutableMap<Player, Deck> prepareDeck() {
         ImmutableMap.Builder<Player, Deck> newDecks = ImmutableMap.builder();
 

@@ -103,6 +103,11 @@ final class DefaultObservableLocalSession implements ObservableLocalSession {
         return safeWithUpdate(delegate::start);
     }
 
+    @Override
+    public ObservableLocalSession suspend() {
+        return safeWithUpdate(delegate::suspend);
+    }
+
     private void sendUpdate(LocalSession original, LocalSession updated) {
         SessionUpdate.diff(original, updated).ifPresent(update -> {
             subject.onNext(update);
