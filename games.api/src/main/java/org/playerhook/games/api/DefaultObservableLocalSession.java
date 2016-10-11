@@ -29,11 +29,6 @@ final class DefaultObservableLocalSession implements ObservableLocalSession {
     }
 
     @Override
-    public Long getRound() {
-        return delegate.getRound();
-    }
-
-    @Override
     public Game getGame() {
         return delegate.getGame();
     }

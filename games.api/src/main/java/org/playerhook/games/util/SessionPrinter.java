@@ -46,7 +46,7 @@ public final class SessionPrinter {
     }
 
     public void print(Session session) {
-        out.print(Strings.padStart(Optional.ofNullable(session.getRound()).orElse(0L).toString(), 59, '='));
+        out.print(Strings.repeat("=", 60));
         out.println('=');
         out.println(center(session.getGame().getTitle(), 60, ' '));
         out.println(Strings.repeat("-", 60));

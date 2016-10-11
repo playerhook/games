@@ -14,7 +14,6 @@ public interface Session extends MapSerializable {
     ImmutableList<Move> getMoves();
     Status getStatus();
     Optional<URL> getURL();
-    Long getRound();
 
     /**
      * @param player the player which deck should be returned

@@ -133,7 +133,7 @@ final class DefaultSession implements Session {
 
     @Override
     public TokenPlacement newPlacement(Token token, Player player, Position source, Position destination) {
-        return TokenPlacement.create(token, player, source, destination, null, round);
+        return TokenPlacement.create(token, player, source, destination, null);
     }
 
     @Override
@@ -141,8 +141,7 @@ final class DefaultSession implements Session {
         return "Session: " + url + " of " + getGame();
     }
 
-    @Override
-    public Long getRound() {
+    Long getRound() {
         return round;
     }
 

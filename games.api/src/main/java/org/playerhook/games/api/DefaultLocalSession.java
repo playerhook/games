@@ -125,7 +125,7 @@ final class DefaultLocalSession implements LocalSession {
         }
         if (hasEmptySeat()) {
             return new DefaultLocalSession(
-                    getRound() + 1,
+                    delegate.getRound() + 1,
                     getGame(),
                     getBoard(),
                     getURL().orElse(null),
@@ -148,7 +148,7 @@ final class DefaultLocalSession implements LocalSession {
         }
         if (canStart()) {
             return new DefaultLocalSession(
-                    getRound() + 1,
+                    delegate.getRound() + 1,
                     getGame(),
                     getBoard(),
                     getURL().orElse(null),
@@ -190,7 +190,7 @@ final class DefaultLocalSession implements LocalSession {
 
         if (genericChecks.getMove().getRuleViolation().isPresent()) {
             return new DefaultLocalSession(
-                    getRound() + 1,
+                    delegate.getRound() + 1,
                     getGame(),
                     getBoard(),
                     getURL().orElse(null),
@@ -210,7 +210,7 @@ final class DefaultLocalSession implements LocalSession {
 
         if (move.getRuleViolation().isPresent()) {
             return new DefaultLocalSession(
-                    getRound() + 1,
+                    delegate.getRound() + 1,
                     getGame(),
                     getBoard(),
                     getURL().orElse(null),
@@ -245,7 +245,7 @@ final class DefaultLocalSession implements LocalSession {
         }
 
         return new DefaultLocalSession(
-                getRound() + 1,
+                delegate.getRound() + 1,
                 getGame(),
                 board,
                 getURL().orElse(null),
@@ -260,10 +260,6 @@ final class DefaultLocalSession implements LocalSession {
     }
 
     private Rules.EvaluationResult doGenericChecks(TokenPlacement placement) {
-        Optional<Long> round = placement.getRound();
-        if (round.isPresent() && !java.util.Objects.equals(round.get(), getRound())) {
-            return Rules.EvaluationResult.builder(placement).ruleViolation(RuleViolation.Default.ROUND_MISMATCH).build();
-        }
         if (getStatus().equals(Status.FINISHED)) {
             return Rules.EvaluationResult.builder(placement).ruleViolation(RuleViolation.Default.GAME_OVER).build();
         }
@@ -276,7 +272,7 @@ final class DefaultLocalSession implements LocalSession {
             if (!placement.getKey().isPresent()) {
                 return Rules.EvaluationResult.builder(placement).ruleViolation(RuleViolation.Default.KEY_MISSING).build();
             }
-            if (!placement.getKey().get().equals(generateUserKey(placement.getPlayer().getUsername(), key))) {
+            if (!placement.getKey().get().equals(generateUserKey(placement.getPlayer().getUsername(), key + ":" + delegate.getRound()))) {
                 return Rules.EvaluationResult.builder(placement).ruleViolation(RuleViolation.Default.KEY_MISMATCH).build();
             }
         }
@@ -353,7 +349,7 @@ final class DefaultLocalSession implements LocalSession {
         if (key == null) {
             return Optional.empty();
         }
-        return Optional.of(generateUserKey(player.getUsername(), key));
+        return Optional.of(generateUserKey(player.getUsername(), key + ":" + delegate.getRound()));
     }
 
     private static String generateUserKey(String username, String privateKey) {
@@ -367,14 +363,10 @@ final class DefaultLocalSession implements LocalSession {
         }
     }
 
-    @Override
-    public Long getRound() {
-        return delegate.getRound();
-    }
 
     @Override
     public TokenPlacement newPlacement(Token token, Player player, Position source, Position destination) {
-        return TokenPlacement.create(token, player, source, destination, key, delegate.getRound());
+        return TokenPlacement.create(token, player, source, destination, getKey(player).orElse(null));
     }
 
     //CHECKSTYLE:OFF
