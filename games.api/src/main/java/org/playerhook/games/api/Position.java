@@ -1,6 +1,8 @@
 package org.playerhook.games.api;
 
 import com.google.common.base.Objects;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableMap;
 import org.playerhook.games.util.MapSerializable;
 
@@ -11,8 +13,21 @@ public final class Position implements MapSerializable {
     private final int row;
     private final int column;
 
+    private static final Cache<String, Position> POSITIONS = CacheBuilder.newBuilder().build();
+
     public static Position at(int row, int column) {
-        return new Position(row, column);
+        String key = "" + row + ":" + column;
+        Position position = POSITIONS.getIfPresent(key);
+
+        if (position != null) {
+            return position;
+        }
+
+        position = new Position(row, column);
+
+        POSITIONS.put(key, position);
+
+        return position;
     }
 
     private Position(int row, int column) {

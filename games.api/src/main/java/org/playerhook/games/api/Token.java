@@ -1,6 +1,8 @@
 package org.playerhook.games.api;
 
 import com.google.common.base.Objects;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Iterables;
 
 /**
@@ -21,7 +23,7 @@ public interface Token {
 
         private final String symbol;
 
-        public Stub(String symbol) {
+        private Stub(String symbol) {
             this.symbol = symbol;
         }
 
@@ -51,6 +53,18 @@ public interface Token {
         public String toString() {
             return getSymbol();
         }
+
+        private static final Cache<String, Token> TOKENS = CacheBuilder.newBuilder().build();
+
+        static Token get(String symbol) {
+            Token token = TOKENS.getIfPresent(symbol);
+            if (token != null) {
+                return token;
+            }
+            token = new Stub(symbol);
+            TOKENS.put(symbol, token);
+            return token;
+        }
     }
 
     static boolean equals(Token token, Token another) {
@@ -59,6 +73,10 @@ public interface Token {
 
     static boolean contains(Iterable<Token> tokens, Token another) {
         return Iterables.contains(Iterables.transform(tokens, Token::getSymbol), another.getSymbol());
+    }
+
+    static Token stub(String symbol) {
+        return Stub.get(symbol);
     }
 
 }

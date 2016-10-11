@@ -75,8 +75,8 @@ public final class Deck implements MapSerializable {
 
 
         return new Deck(
-            MapSerializable.loadList(map.getOrDefault("tokens", ImmutableList.of()), o -> new Token.Stub(o.toString())),
-            MapSerializable.loadList(map.getOrDefault("secretTokens", ImmutableList.of()), o -> new Token.Stub(o.toString()))
+            MapSerializable.loadList(map.getOrDefault("tokens", ImmutableList.of()), o -> Token.stub(o.toString())),
+            MapSerializable.loadList(map.getOrDefault("secretTokens", ImmutableList.of()), o -> Token.stub(o.toString()))
         );
     }
 
