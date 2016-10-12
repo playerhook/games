@@ -35,6 +35,7 @@ public interface LocalSession extends Session {
 
     LocalSession start();
     LocalSession suspend();
+    LocalSession resume();
 
     default boolean hasEmptySeat() {
         return getPlayers().size() < getGame().getRules().getMaxPlayers();

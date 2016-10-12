@@ -170,7 +170,7 @@ final class DefaultLocalSession implements LocalSession {
             throw new IllegalStateException("The game is not in progress!");
         }
         return new DefaultLocalSession(
-                delegate.getRound() + 1,
+                delegate.getRound(),
                 getGame(),
                 getBoard(),
                 getURL().orElse(null),
@@ -179,6 +179,26 @@ final class DefaultLocalSession implements LocalSession {
                 getPlayers(),
                 getMoves(),
                 Status.SUSPENDED,
+                delegate.getPlayerOnTurn().orElse(null),
+                key
+        );
+    }
+
+    @Override
+    public LocalSession resume() {
+        if (!getStatus().equals(Status.SUSPENDED)) {
+            throw new IllegalStateException("The game is not suspended!");
+        }
+        return new DefaultLocalSession(
+                delegate.getRound(),
+                getGame(),
+                getBoard(),
+                getURL().orElse(null),
+                delegate.getDecks(),
+                delegate.getScores(),
+                getPlayers(),
+                getMoves(),
+                Status.IN_PROGRESS,
                 delegate.getPlayerOnTurn().orElse(null),
                 key
         );
