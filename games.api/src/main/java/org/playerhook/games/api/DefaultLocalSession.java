@@ -210,7 +210,7 @@ final class DefaultLocalSession implements LocalSession {
 
         if (genericChecks.getMove().getRuleViolation().isPresent()) {
             return new DefaultLocalSession(
-                    delegate.getRound() + 1,
+                    delegate.getRound(),
                     getGame(),
                     getBoard(),
                     getURL().orElse(null),
@@ -230,7 +230,7 @@ final class DefaultLocalSession implements LocalSession {
 
         if (move.getRuleViolation().isPresent()) {
             return new DefaultLocalSession(
-                    delegate.getRound() + 1,
+                    delegate.getRound(),
                     getGame(),
                     getBoard(),
                     getURL().orElse(null),

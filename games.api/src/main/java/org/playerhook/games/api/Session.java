@@ -34,7 +34,7 @@ public interface Session extends MapSerializable {
 
     default Optional<Move> getLastMove() {
         if (getMoves().size() > 0) {
-            return Optional.of(getMoves().get(0));
+            return Optional.of(getMoves().get(getMoves().size() - 1));
         }
         return Optional.empty();
     }

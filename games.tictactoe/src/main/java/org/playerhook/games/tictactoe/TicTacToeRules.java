@@ -88,16 +88,16 @@ public class TicTacToeRules implements Rules {
         for (ImmutableList<Direction> directions : COUNTING_DIRECTION) {
             int count = countAround(session, placement, directions);
             if (count >= toWin) {
-                return builder.updateScore(placement.getPlayer(), 1).finishGame().build();
+                return builder.updateScore(placement.getPlayer(), session.getDeck(placement.getPlayer()).getPlayableTokens().size() + 1).finishGame().build();
             }
         }
 
         for (Player player : session.getPlayers()) {
             if (!player.equals(placement.getPlayer())) {
                 builder.nextPlayer(player);
-                if (session.getDeck(player).getPlayableTokens().size() == 0) {
-                    return builder.finishGame().build();
-                }
+            }
+            if (session.getDeck(player).getPlayableTokens().size() == 0) {
+                return builder.finishGame().build();
             }
         }
 
