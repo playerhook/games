@@ -25,7 +25,7 @@ subprojects {
     targetCompatibility = 1.8
 
     group = 'org.playerhook'
-    version = '0.1.0-alpha-29'
+    version = '0.1.0-alpha-30'
 
     repositories {
         jcenter()

@@ -5,6 +5,9 @@ import org.playerhook.games.api.*;
 
 import java.net.URL;
 
+import static java.lang.Math.ceil;
+import static java.lang.Math.floor;
+import static java.lang.Math.round;
 import static org.playerhook.games.api.LocalSession.create;
 
 public class TicTacToeRules implements Rules {
@@ -67,7 +70,7 @@ public class TicTacToeRules implements Rules {
 
     @Override
     public Board prepareBoard() {
-        return Board.square((int) Math.round(toWin * 1.5));
+        return Board.square((int) round(toWin * 1.5));
     }
 
     @Override
@@ -76,9 +79,11 @@ public class TicTacToeRules implements Rules {
             throw new IllegalArgumentException("Player " + player + " does not play this game!");
         }
         if (session.getPlayers().indexOf(player) == 0) {
-            return Deck.ofSame(TicTacToeTokens.CROSS, session.getBoard().getWidth() * session.getBoard().getHeight());
+            return Deck.ofSame(TicTacToeTokens.CROSS,
+                    (int) round(ceil(session.getBoard().getWidth() * session.getBoard().getHeight() / 2d)));
         }
-        return Deck.ofSame(TicTacToeTokens.CIRCLE, session.getBoard().getWidth() * session.getBoard().getHeight());
+        return Deck.ofSame(TicTacToeTokens.CIRCLE,
+                (int) round(floor(session.getBoard().getWidth() * session.getBoard().getHeight() / 2d)));
     }
 
     @Override
@@ -88,16 +93,21 @@ public class TicTacToeRules implements Rules {
         for (ImmutableList<Direction> directions : COUNTING_DIRECTION) {
             int count = countAround(session, placement, directions);
             if (count >= toWin) {
-                return builder.updateScore(placement.getPlayer(), session.getDeck(placement.getPlayer()).getPlayableTokens().size() + 1).finishGame().build();
+                return builder.updateScore(placement.getPlayer(),
+                        session.getBoard().getWidth()
+                        * session.getBoard().getHeight()
+                        - session.getBoard().getTokenPlacements().size()
+                        + 1).finishGame().build();
             }
         }
 
         for (Player player : session.getPlayers()) {
             if (!player.equals(placement.getPlayer())) {
                 builder.nextPlayer(player);
-            }
-            if (session.getDeck(player).getPlayableTokens().size() == 0) {
-                return builder.finishGame().build();
+                if (session.getDeck(player).getPlayableTokens().size() == 0) {
+                    return builder.finishGame().build();
+                }
+                break;
             }
         }
 
