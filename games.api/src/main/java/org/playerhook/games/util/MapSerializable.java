@@ -1,6 +1,7 @@
 package org.playerhook.games.util;
 
 import com.google.common.collect.ImmutableList;
+import org.playerhook.games.api.Avatar;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -51,6 +52,10 @@ public interface MapSerializable {
 
     static String loadString(Map<String, Object> map, String property) {
         return Optional.ofNullable(map.get(property)).map(Object::toString).orElse(null);
+    }
+
+    static Avatar loadAvatar(Map<String, Object> map, String property) {
+        return Optional.ofNullable(map.get(property)).map(Object::toString).map(Avatar::of).orElse(null);
     }
 
     static Instant loadInstant(Map<String, Object> map, String property) {

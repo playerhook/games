@@ -5,26 +5,25 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import org.playerhook.games.util.MapSerializable;
 
-import java.net.URL;
 import java.util.Map;
 import java.util.Optional;
 
 public final class Player implements MapSerializable {
 
     private final String username;
-    private final URL avatar;
+    private final Avatar avatar;
     private final String displayName;
     private final String displayColor;
 
-    public static Player create(String username, URL avatar, String displayName, String displayColor) {
+    public static Player create(String username, Avatar avatar, String displayName, String displayColor) {
         return new Player(username, avatar, displayName, displayColor);
     }
 
-    public static Player create(String username, URL avatar, String displayName) {
+    public static Player create(String username, Avatar avatar, String displayName) {
         return create(username, avatar, displayName, null);
     }
 
-    public static Player create(String username, URL avatar) {
+    public static Player create(String username, Avatar avatar) {
         return create(username, avatar, null);
     }
 
@@ -32,7 +31,7 @@ public final class Player implements MapSerializable {
         return create(username, null);
     }
 
-    private Player(String username, URL avatar, String displayName, String displayColor) {
+    private Player(String username, Avatar avatar, String displayName, String displayColor) {
         this.username = Preconditions.checkNotNull(username, "Username cannot be null");
         this.avatar = avatar;
         this.displayName = displayName;
@@ -43,7 +42,7 @@ public final class Player implements MapSerializable {
         return username;
     }
 
-    public Optional<URL> getAvatar() {
+    public Optional<Avatar> getAvatar() {
         return Optional.ofNullable(avatar);
     }
 
@@ -82,7 +81,7 @@ public final class Player implements MapSerializable {
         ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
 
         builder.put("username", username);
-        getAvatar().ifPresent(url -> builder.put("avatar", url.toExternalForm()));
+        getAvatar().ifPresent(url -> builder.put("avatar", avatar.toString()));
         getDisplayName().ifPresent(displayName -> builder.put("displayName", displayName));
         getDisplayColor().ifPresent(displayColor -> builder.put("displayColor", displayColor));
 
@@ -100,7 +99,7 @@ public final class Player implements MapSerializable {
 
         return new Player(
             MapSerializable.loadString(map, "username"),
-            MapSerializable.loadURL(map, "avatar"),
+            MapSerializable.loadAvatar(map, "avatar"),
             MapSerializable.loadString(map, "displayName"),
             MapSerializable.loadString(map, "displayColor")
         );
