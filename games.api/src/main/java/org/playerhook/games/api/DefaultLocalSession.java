@@ -9,6 +9,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import java.net.URL;
+import java.time.Instant;
 import java.util.*;
 import java.util.Optional;
 
@@ -32,7 +33,8 @@ final class DefaultLocalSession implements LocalSession {
                 url,
                 ImmutableList.of(),
                 ImmutableMap.of(),
-                ImmutableMap.of()
+                ImmutableMap.of(),
+                Instant.now()
         );
 
         this.key = null;
@@ -52,7 +54,8 @@ final class DefaultLocalSession implements LocalSession {
             ImmutableList<Move> moves,
             Status status,
             Player activePlayer,
-            String key
+            String key,
+            Instant lastUpdated
     ) {
         this.delegate = new DefaultSession(
                 version,
@@ -64,7 +67,8 @@ final class DefaultLocalSession implements LocalSession {
                 url,
                 moves,
                 decks,
-                scores
+                scores,
+                lastUpdated
         );
         this.key = key;
     }
@@ -82,7 +86,8 @@ final class DefaultLocalSession implements LocalSession {
                 delegate.getMoves(),
                 delegate.getStatus(),
                 delegate.getPlayerOnTurn().orElse(null),
-                privateKey
+                privateKey,
+                delegate.getLastUpdated()
         );
 
     }
@@ -135,7 +140,8 @@ final class DefaultLocalSession implements LocalSession {
                     delegate.getMoves(),
                     getStatus(),
                     delegate.getPlayerOnTurn().orElse(null),
-                    key
+                    key,
+                    Instant.now()
             );
         }
         throw new IllegalStateException("No more seats!");
@@ -158,7 +164,8 @@ final class DefaultLocalSession implements LocalSession {
                     getMoves(),
                     Status.IN_PROGRESS,
                     Iterables.getFirst(getPlayers(), null),
-                    key
+                    key,
+                    Instant.now()
             );
         }
         throw new IllegalStateException("Not enough players!");
@@ -180,7 +187,8 @@ final class DefaultLocalSession implements LocalSession {
                 getMoves(),
                 Status.SUSPENDED,
                 delegate.getPlayerOnTurn().orElse(null),
-                key
+                key,
+                Instant.now()
         );
     }
 
@@ -200,7 +208,8 @@ final class DefaultLocalSession implements LocalSession {
                 getMoves(),
                 Status.IN_PROGRESS,
                 delegate.getPlayerOnTurn().orElse(null),
-                key
+                key,
+                Instant.now()
         );
     }
 
@@ -225,6 +234,11 @@ final class DefaultLocalSession implements LocalSession {
     }
 
     @Override
+    public Instant getLastUpdated() {
+        return delegate.getLastUpdated();
+    }
+
+    @Override
     public LocalSession play(TokenPlacement placement) {
         Rules.EvaluationResult genericChecks = doGenericChecks(placement);
 
@@ -240,7 +254,8 @@ final class DefaultLocalSession implements LocalSession {
                     ImmutableList.<Move>builder().addAll(getMoves()).add(genericChecks.getMove()).build(),
                     getStatus(),
                     getPlayerOnTurn().orElse(null),
-                    key
+                    key,
+                    Instant.now()
             );
         }
 
@@ -260,7 +275,8 @@ final class DefaultLocalSession implements LocalSession {
                     ImmutableList.<Move>builder().addAll(getMoves()).add(result.getMove()).build(),
                     getStatus(),
                     getPlayerOnTurn().orElse(null),
-                    key
+                    key,
+                    Instant.now()
             );
         }
 
@@ -295,7 +311,8 @@ final class DefaultLocalSession implements LocalSession {
                 ImmutableList.<Move>builder().addAll(getMoves()).add(result.getMove()).build(),
                 result.getNextStatus().orElse(getStatus()),
                 activePlayer,
-                key
+                key,
+                Instant.now()
         );
     }
 
@@ -365,7 +382,8 @@ final class DefaultLocalSession implements LocalSession {
                 defaultSession.getMoves(),
                 defaultSession.getStatus(),
                 defaultSession.getPlayerOnTurn().orElse(null),
-                key
+                key,
+                defaultSession.getLastUpdated()
         );
     }
 

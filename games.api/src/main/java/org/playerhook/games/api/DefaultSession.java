@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import java.net.URL;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -24,10 +25,11 @@ final class DefaultSession implements Session {
     private final ImmutableList<Move> moves;
     private final ImmutableMap<Player, Deck> decks;
     private final ImmutableMap<Player, Integer> scores;
+    private final Instant lastUpdated;
 
     DefaultSession(long round, Board board, Game game, Status status, ImmutableList<Player> players,
                    Player activePlayer, URL url, ImmutableList<Move> moves, ImmutableMap<Player, Deck> decks,
-                   ImmutableMap<Player, Integer> scores) {
+                   ImmutableMap<Player, Integer> scores, Instant lastUpdated) {
         this.round = round;
         this.board = board;
         this.game = game;
@@ -38,6 +40,7 @@ final class DefaultSession implements Session {
         this.moves = moves;
         this.decks = decks;
         this.scores = scores;
+        this.lastUpdated = lastUpdated;
     }
 
     static DefaultSession load(Object session) {
@@ -58,7 +61,8 @@ final class DefaultSession implements Session {
                 loadURL(payload, "url"),
                 loadList(payload.getOrDefault("playedMoves", Collections.emptyList()), Move::load),
                 loadDecks(players, payload.getOrDefault("decks", Collections.emptyList())),
-                loadScores(players, payload.getOrDefault("scores", Collections.emptyList()))
+                loadScores(players, payload.getOrDefault("scores", Collections.emptyList())),
+                loadInstant(payload, "lastUpdated")
         );
     }
 
@@ -132,6 +136,11 @@ final class DefaultSession implements Session {
     }
 
     @Override
+    public Instant getLastUpdated() {
+        return lastUpdated;
+    }
+
+    @Override
     public TokenPlacement newPlacement(Token token, Player player, Position source, Position destination) {
         return TokenPlacement.create(token, player, source, destination, null);
     }
@@ -157,6 +166,7 @@ final class DefaultSession implements Session {
         builder.put("decks", ImmutableMap.copyOf(getPlayers().stream().collect(Collectors.toMap(Player::getUsername, (player1) -> getDeck(player1).toMap(level)))));
         builder.put("playedMoves", getMoves().stream().map((move) -> move.toMap(level)).collect(Collectors.toList()));
         builder.put("status", getStatus().name());
+        builder.put("lastUpdated", lastUpdated.toEpochMilli());
 
         getPlayerOnTurn().ifPresent(player -> builder.put("playerOnTurn", player.toMap(level)));
         getURL().ifPresent(s -> builder.put("url", s.toExternalForm()));
@@ -192,12 +202,13 @@ final class DefaultSession implements Session {
                 Objects.equal(url, that.url) &&
                 Objects.equal(moves, that.moves) &&
                 Objects.equal(decks, that.decks) &&
-                Objects.equal(scores, that.scores);
+                Objects.equal(scores, that.scores) &&
+                Objects.equal(lastUpdated, that.lastUpdated);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(round, board, game, status, players, activePlayer, url, moves, decks, scores);
+        return Objects.hashCode(round, board, game, status, players, activePlayer, url, moves, decks, scores, lastUpdated);
     }
 
     //CHECKSTYLE:ON

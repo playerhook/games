@@ -6,6 +6,7 @@ import rx.Observable;
 import rx.subjects.PublishSubject;
 
 import java.net.URL;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 
@@ -146,6 +147,11 @@ final class DefaultObservableLocalSession implements ObservableLocalSession {
             subject.onError(e);
             throw e;
         }
+    }
+
+    @Override
+    public Instant getLastUpdated() {
+        return delegate.getLastUpdated();
     }
 
     @FunctionalInterface private interface UnsafeSessionOperation {

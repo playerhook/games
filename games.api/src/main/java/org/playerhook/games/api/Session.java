@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import org.playerhook.games.util.MapSerializable;
 
 import java.net.URL;
+import java.time.Instant;
 import java.util.Optional;
 
 public interface Session extends MapSerializable {
@@ -14,6 +15,7 @@ public interface Session extends MapSerializable {
     ImmutableList<Move> getMoves();
     Status getStatus();
     Optional<URL> getURL();
+    Instant getLastUpdated();
 
     /**
      * @param player the player which deck should be returned
